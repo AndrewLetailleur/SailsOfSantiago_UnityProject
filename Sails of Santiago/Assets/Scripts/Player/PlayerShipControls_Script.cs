@@ -11,18 +11,16 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     //gun code
     public GameObject Projectile;//the 'basic ball'
-    private GameObject[] AttackGuns; //lazy hack test version, of the real deal
+    private GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal
     //public GameObject[] LeftGuns, RightGuns, SpecialGuns;//gun array
         //rate of fire
     public float loadRate = 1F;//approx. 1 second or such, to start?
-    private float a_load = 0f;//loading times, reset upon fire
-        //left
-        //right
-        //spec
-    private bool canFire = true;//debug, cue firing pins.
-        //left
-        //right
-        //spec
+    private float a_load, l_load, r_load = 0f;//loading times, reset upon fire
+        //left & right = left/rght
+            //spec = canFire, hack wise
+    private bool canFire, leftFire, rghtFire = true;//debug, cue firing pins.
+        //left & right = left/rght
+            //spec = canFire, hack wise
 
     //GUI Code
         //barf//
@@ -61,8 +59,10 @@ public class PlayerShipControls_Script : MonoBehaviour {
     //asset prefabs
         public GameObject Sails;
         public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
-        public float Max_SY, Min_SY;
-        private float differ;       //use for sail state?
+        private float Max_SY, Min_SY;//get sail heighty
+        private float Max_SZ, Min_SZ;//get sail thickness
+
+        private float differ, diff_Z;       //use for sail state?
         private bool Shrink, Growth = false;
         //do not touch POS, it's a nightmare in positioning, glitch wise
 
@@ -73,7 +73,8 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //set sail's pre-emptively est.
         //set up the projectiles, update auto wiser.
         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
-
+        LeftGuns = GameObject.FindGameObjectsWithTag("P_LeftCannon");
+        RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
         //pre-empt set move to zero, caution wise.
         Rotation = 0;
         Velocity = 0;
@@ -81,16 +82,22 @@ public class PlayerShipControls_Script : MonoBehaviour {
         HP_SLIDER.maxValue = HP_MAX;
         HP = HP_SLIDER.maxValue;
         RB = this.GetComponent<Rigidbody>();//sets the RB
-
-        SailScale = Sails.transform.localScale; //get the scale of the actual transforms
+            //get the scale of the actual transforms
+        SailScale = Sails.transform.localScale; //this code calcs, assuming the sails are fully down at the start.
         Max_SY = SailScale.y;
         Min_SY = Max_SY / 20; //Scale of 1 / 20 = 0.05
+        Min_SZ = SailScale.z;
+        Max_SZ = Min_SZ * 4; // scale of 1 / 4, from sails unfurled.
+
 
         //set to zero, as there's no movement.
+            //that means, sails are pulled up
         SailScale.y = Min_SY;
+        SailScale.z = Max_SZ;
         Sails.transform.localScale = SailScale;
         //
         differ = Max_SY - Min_SY;
+        diff_Z = Max_SZ - Min_SZ;
         //get code to set array later
         //get ze guns
     }
@@ -168,17 +175,32 @@ public class PlayerShipControls_Script : MonoBehaviour {
     void ChangeSails()
     {
         if (Shrink) {
-            if ((SailScale.y - Time.deltaTime <= Min_SY))
+            if ((SailScale.y - Time.deltaTime <= Min_SY)) {
                 SailScale.y = Min_SY;
-            else
+                SailScale.z = Max_SZ;
+            } else {
                 SailScale.y -= Time.deltaTime;//(Time.deltaTime / 10);
+                if (SailScale.z + (Time.deltaTime) <= Max_SZ)
+                    SailScale.z += (Time.deltaTime); //hack test, unthicken
+                else
+                    SailScale.z = Max_SZ;
+                //end if checker
+            }
         }//endif 
         if (Growth) {
-            if ((SailScale.y + Time.deltaTime >= Max_SY))
+            if ((SailScale.y + Time.deltaTime >= Max_SY)) { 
                 SailScale.y = Max_SY;
-            else
+                SailScale.z = Min_SZ;
+            } else { 
                 SailScale.y += Time.deltaTime;//(Time.deltaTime / 10);
-        }//endif 
+                if (SailScale.z - (Time.deltaTime) >= Min_SZ)
+                    SailScale.z -= (Time.deltaTime); //hack test, unthicken
+                else
+                    SailScale.z = Min_SZ;
+                //end if checker
+            }
+        }//endif
+
         Sails.transform.localScale = SailScale;//the rescaling. Do NOT touch position.
 
         //max speed dependant on scale size
@@ -226,18 +248,52 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //end hack if
         //Spacebar for now, BAR test-y wise
 
+
+            //firing code "works" for now, but needs some fine tuning both on code end, and asset end. Pointer wise.
         if (Input.GetKeyDown("space") && canFire) {//think of how to dodge a fore loop?
             for (int i = 0; i < AttackGuns.Length; i++) {
                 //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
                 //this can also be additionally useful, if/when rotation becomes an issue, later on.
                 GameObject Bullet = Instantiate(Projectile, AttackGuns[i].transform.position, AttackGuns[i].transform.rotation) as GameObject;
                 Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
-                BulletRB.AddForce(transform.forward * (GunVelo * 3 / 2));
-                BulletRB.AddForce(transform.up * (GunVelo / 2));
+                BulletRB.AddForce(AttackGuns[i].transform.forward * (GunVelo * 3 / 2));
+                BulletRB.AddForce(AttackGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
             canFire = false;
             a_load = loadRate;//reset the firing pin
+        }
+
+        if (Input.GetKeyDown("z") && leftFire)
+        {//think of how to dodge a fore loop?
+            for (int i = 0; i < LeftGuns.Length; i++)
+            {
+                //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
+                //this can also be additionally useful, if/when rotation becomes an issue, later on.
+                GameObject Bullet = Instantiate(Projectile, LeftGuns[i].transform.position, LeftGuns[i].transform.rotation) as GameObject;
+                Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
+                BulletRB.AddForce(LeftGuns[i].transform.forward * (GunVelo * 3 / 2));
+                BulletRB.AddForce(LeftGuns[i].transform.up * (GunVelo / 2));
+                //	Debug.Log ("Open Fire!");
+            }//end for    //C_Load();//reload, disabled for test code
+            leftFire = false;
+            l_load = loadRate;//reset the firing pin
+        }
+
+        if (Input.GetKeyDown("c") && rghtFire)
+        {//think of how to dodge a fore loop?
+            for (int i = 0; i < RightGuns.Length; i++)
+            {
+                //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
+                //this can also be additionally useful, if/when rotation becomes an issue, later on.
+                GameObject Bullet = Instantiate(Projectile, RightGuns[i].transform.position, RightGuns[i].transform.rotation) as GameObject;
+                Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
+                BulletRB.AddForce(RightGuns[i].transform.forward * (GunVelo * 3 / 2));
+                BulletRB.AddForce(RightGuns[i].transform.up * (GunVelo / 2));
+                //	Debug.Log ("Open Fire!");
+            }//end for    //C_Load();//reload, disabled for test code
+            rghtFire = false;
+            r_load = loadRate;//reset the firing pin
         }
     }
 
@@ -247,6 +303,20 @@ public class PlayerShipControls_Script : MonoBehaviour {
             a_load -= Time.deltaTime;
             if (a_load <= 0)
                 canFire = true;
+            //endif
+        }
+        if (!leftFire)
+        {
+            l_load -= Time.deltaTime;
+            if (l_load <= 0)
+                leftFire = true;
+            //endif
+        }
+        if (!rghtFire)
+        {
+            r_load -= Time.deltaTime;
+            if (r_load <= 0)
+                rghtFire = true;
             //endif
         }
     }

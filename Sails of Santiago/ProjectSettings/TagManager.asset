@@ -8,6 +8,9 @@ TagManager:
   - P_LeftCannon
   - P_RightCannon
   - P_SpecCannon
+  - Water
+  - SailGUI
+  - HullGUI
   layers:
   - Default
   - TransparentFX
