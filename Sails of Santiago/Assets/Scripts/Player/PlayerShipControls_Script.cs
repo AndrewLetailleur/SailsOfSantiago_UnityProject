@@ -1,47 +1,49 @@
-﻿using System.Collections;
+﻿using System;//for math functionality, to the power of
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerShipControls_Script : MonoBehaviour {
 
-
+    //misc variable assets, tinker wise
     private Rigidbody RB;//for easy ref of the Rigidbody
-    public Slider HP_SLIDER; //for the slider GUI thing
 
-    //gun code
+    //GUI code
+    private Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
+        //health and est/ammo values
+    private float HP_MAX = 100f;//set at 100, and floaty for maximum compatibility on percentages
+    private float Sail_A, HP_Sail, Hull_A, HP_Hull; //to edit the Alpha values of images, and acquire/set the health of those assets
+    private Image Sail_HUD, Hull_HUD;//for the GUI images, edit wise
+    private Color Sail_COL, Hull_COL;//to grab the colors, alpha edit wise
+    private Text Hull_TXT, Sail_TXT, Spec_TXT; //for the text display, GUI edit wise
+
+    //ship sail variables, (mostly) var less buggy now edition!
+    public GameObject Sails;
+    public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
+    private float Max_SY, Min_SY, Max_SZ, Min_SZ, differ, diff_Z;//get sail heightness & thickness, along with sail difference state
+    private bool Shrink, Growth = false;//is it rising/falling triggers
+        //do not touch POS/itioning of the sails themselves; as that's a nightmare in technical difficulties, glitch wise
+
+    //gun code, deals with firing and attack grabs
     public GameObject Projectile;//the 'basic ball'
-    private GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal
-    //public GameObject[] LeftGuns, RightGuns, SpecialGuns;//gun array
+    private GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
+    public bool canFire, leftFire, rghtFire = true;//fire triggers, cue firing pins.
         //rate of fire
-    public float loadRate = 1F;//approx. 1 second or such, to start?
-    private float a_load, l_load, r_load = 0f;//loading times, reset upon fire
-        //left & right = left/rght
-            //spec = canFire, hack wise
-    private bool canFire, leftFire, rghtFire = true;//debug, cue firing pins.
-        //left & right = left/rght
-            //spec = canFire, hack wise
-
-    //GUI Code
-        //barf//
-    //GunCode
-        //barf//
+    private float loadRate = 1F;//approx. 1 second or such, to start?
+    private float s_load, l_load, r_load = 0f;//loading times, reset upon fire
+        //special ammo
+    private int MaxAmmo = 21;//prefab test for now, to ensue there's special ammo in toe. Should be int, bar floaty timer shenanigans with dragon fire?
+    private int SpecAmmo;//the current amount of ammo
+    
     //StatusCode
         //DMG//
     //camera
         //see shark//
     //est?
 
-        //GUI variables
-    //for maximum health    , curr version works with slider feature ATM
-    private float HP_MAX = 100f;//int for now, san's sake
-    private float HP;//needs to be accessed for now.
-        //rely on tags instead, to call it private?
-    //public Text GUI_HP; // To call upon later, HP Val to text
-        //public Image ShipCON; // DamageFX
-
-    //movement variables
-    //momentum
+    //movement code, as we have to get transport/est from somewhere
+        //movement variables
     private float Velocity;
     private float MinVelocity = 0f; //private, since min HAS to be set at Zero
     public float CurMaxVelocity;
@@ -54,22 +56,9 @@ public class PlayerShipControls_Script : MonoBehaviour {
     public float Speed;
 
 
-        //ship sail variables, WIP
-    //buggy variables, ONLY EDIT SCALE
-    //asset prefabs
-        public GameObject Sails;
-        public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
-        private float Max_SY, Min_SY;//get sail heighty
-        private float Max_SZ, Min_SZ;//get sail thickness
-
-        private float differ, diff_Z;       //use for sail state?
-        private bool Shrink, Growth = false;
-        //do not touch POS, it's a nightmare in positioning, glitch wise
-
     // Use this for initialization
     void Start() {
 
-        
         //set sail's pre-emptively est.
         //set up the projectiles, update auto wiser.
         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
@@ -79,51 +68,98 @@ public class PlayerShipControls_Script : MonoBehaviour {
         Rotation = 0;
         Velocity = 0;
 
-        HP_SLIDER.maxValue = HP_MAX;
-        HP = HP_SLIDER.maxValue;
+        //get sliders, then set values est
+            //left cannon set up
+        l_load = loadRate;
+        LEFT_SLIDE = GameObject.FindGameObjectWithTag("LeftAmmoGUI").GetComponent<Slider>();//\\\
+        LEFT_SLIDE.maxValue = loadRate;
+        LEFT_SLIDE.value = CalcLeftLoad();
+            //right cannon set up
+        r_load = loadRate;
+        RIGHT_SLIDE = GameObject.FindGameObjectWithTag("RightAmmoGUI").GetComponent<Slider>();//|| don't forget to GET the component on top
+        RIGHT_SLIDE.maxValue = loadRate;
+        RIGHT_SLIDE.value = CalcRightLoad();
+            //special ability set up
+        s_load = loadRate;
+        SPEC_SLIDE = GameObject.FindGameObjectWithTag("SpecialGUI").GetComponent<Slider>();//
+        SPEC_SLIDE.maxValue = loadRate;
+        SPEC_SLIDE.value = CalcSpecialLoad();
+        //text HUD variables on top
+        SpecAmmo = MaxAmmo;//auto load
+        Spec_TXT = GameObject.FindGameObjectWithTag("SpecialTXT").GetComponent<Text>();
+        Spec_TXT.text = "Ammo: " + SpecAmmo + "/" + MaxAmmo;
+        //end grab sliders
+
+        //get GUI on Hull and Sail, then set up accordingly.
+            //hull
+        HP_Hull = HP_MAX; //max is 100, for 100%
+        Hull_TXT = GameObject.FindGameObjectWithTag("HullTXT").GetComponent<Text>();
+        Hull_HUD = GameObject.FindGameObjectWithTag("HullGUI").GetComponent<Image>();
+        Hull_COL = Hull_HUD.color;
+        Hull_Update();
+            //sail
+        HP_Sail = HP_MAX; //max is 100, for 100%
+        Sail_HUD = GameObject.FindGameObjectWithTag("SailGUI").GetComponent<Image>();
+        Sail_TXT = GameObject.FindGameObjectWithTag("SailTXT").GetComponent<Text>();
+        Sail_COL = Sail_HUD.color;
+        Sail_Update();
+        //end GUI set & update on health variables
+
+
         RB = this.GetComponent<Rigidbody>();//sets the RB
             //get the scale of the actual transforms
         SailScale = Sails.transform.localScale; //this code calcs, assuming the sails are fully down at the start.
+            //y height var
         Max_SY = SailScale.y;
         Min_SY = Max_SY / 20; //Scale of 1 / 20 = 0.05
+        differ = Max_SY - Min_SY;
+            //z width var
         Min_SZ = SailScale.z;
         Max_SZ = Min_SZ * 4; // scale of 1 / 4, from sails unfurled.
-
-
-        //set to zero, as there's no movement.
-            //that means, sails are pulled up
-        SailScale.y = Min_SY;
-        SailScale.z = Max_SZ;
-        Sails.transform.localScale = SailScale;
-        //
-        differ = Max_SY - Min_SY;
         diff_Z = Max_SZ - Min_SZ;
-        //get code to set array later
-        //get ze guns
+            //set sail scale
+        SailScale.y = Min_SY;//set to zero, as there's no movement.
+        SailScale.z = Max_SZ;//that means, sails are all rolled up and padded
+        Sails.transform.localScale = SailScale;
+        //end set up
     }
+
 
     // Update is called once per frame
     void Update() {
             //update GUI, later when harmed only to save on RAM.
-        HP_SLIDER.value = HP;
         
         //vertical control
         MoveShip();
         //horizontal control
         RotateShip();
-
         //buggy pirate flag code. Now with only toscale woes!
         ChangeSails();
-
         //combat code
-        ShipAttack();
-            //check firing pin's afterwards
-        Reload();
-            //the GUI
-        //GuiCode();
-
+        ShipAttack();//check firing pin's afterwards
+        //the GUI
+        GUICode();//also does reloading, so there's no need TO reload :P
+            //testground for stuff
+        //TestVoider();
     }
-    
+
+        //code for enemies, if crashed upon for later testing
+    /*private*/ void OnTriggerEnter(Collider other)//if crashing say
+    {}
+    /*private*/ void OnCollisionEnter(Collision collision)
+    {}
+
+    /*void TestVoider() {///test prefabs, to check hp updates work
+        if (Input.GetKeyDown(KeyCode.K)) {
+            HP_Sail -= 1.14f;
+            Sail_Update();
+        } if (Input.GetKeyDown(KeyCode.L)) {
+            HP_Hull -= 9.1f;
+            Hull_Update();
+        }
+    }*/ ///end test prefabs
+
+
     //Ship Velocity
     void MoveShip()
     {
@@ -169,7 +205,26 @@ public class PlayerShipControls_Script : MonoBehaviour {
         }
 
     }
+    void RotateShip()
+    {
+        //horizontal control
+        Rotation = (Input.GetAxis("Horizontal") * Time.deltaTime * (Velocity + Accel));
+        //goes to "0" if no input is given. Sharp[y]
+        if (Rotation >= MaxRotation)
+            Rotation = MaxRotation;
+        else if (Rotation <= -MaxRotation)
+            Rotation = -MaxRotation;
+        //endif
 
+        //the rotation magic
+        transform.Rotate(0, Rotation, 0);//works, but is too sharp
+                                         //think of how to then rotate the force/momentum of the ship
+
+        //rotate the velocity as well, after rotating.
+        Vector3 velocity = RB.velocity;//TEMP VALUE, SOURCE == https://answers.unity.com/questions/10781/how-might-i-rotate-rigidbody-momentum.html
+        RB.velocity = Vector3.zero;
+        RB.velocity = transform.forward * velocity.magnitude;//good enough for now
+    }
 
     //Shift the sails, visual effect.
     void ChangeSails()
@@ -216,28 +271,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
 
     }
-
-
-    void RotateShip()
-    {
-        //horizontal control
-        Rotation = (Input.GetAxis("Horizontal") * Time.deltaTime * (Velocity + Accel));
-            //goes to "0" if no input is given. Sharp[y]
-        if (Rotation >= MaxRotation)
-            Rotation = MaxRotation;
-        else if (Rotation <= -MaxRotation)
-            Rotation = -MaxRotation;
-        //endif
-
-        //the rotation magic
-        transform.Rotate(0, Rotation, 0);//works, but is too sharp
-                                         //think of how to then rotate the force/momentum of the ship
-
-        //rotate the velocity as well, after rotating.
-        Vector3 velocity = RB.velocity;//TEMP VALUE, SOURCE == https://answers.unity.com/questions/10781/how-might-i-rotate-rigidbody-momentum.html
-        RB.velocity = Vector3.zero;
-        RB.velocity = transform.forward * velocity.magnitude;//good enough for now
-    }
+    
 
     void ShipAttack()
     {
@@ -247,7 +281,6 @@ public class PlayerShipControls_Script : MonoBehaviour {
             GunVelo = 2048;
         //end hack if
         //Spacebar for now, BAR test-y wise
-
 
             //firing code "works" for now, but needs some fine tuning both on code end, and asset end. Pointer wise.
         if (Input.GetKeyDown("space") && canFire) {//think of how to dodge a fore loop?
@@ -260,8 +293,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(AttackGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
-            canFire = false;
-            a_load = loadRate;//reset the firing pin
+            S_Load();
         }
 
         if (Input.GetKeyDown("z") && leftFire)
@@ -276,8 +308,8 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(LeftGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
+            L_Load();
             leftFire = false;
-            l_load = loadRate;//reset the firing pin
         }
 
         if (Input.GetKeyDown("c") && rghtFire)
@@ -292,34 +324,108 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(RightGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
+            R_Load();
             rghtFire = false;
-            r_load = loadRate;//reset the firing pin
         }
     }
 
-
-    void Reload() {
-        if (!canFire) {
-            a_load -= Time.deltaTime;
-            if (a_load <= 0)
+    void GUICode() {
+        //ammo part
+        if (!canFire && (SpecAmmo > 0)) {//if special bar is empty
+            s_load += Time.deltaTime;
+            if (s_load >= loadRate) {
+                if (!canFire)
+                    SpecAmmo--;
+                //endif
                 canFire = true;
-            //endif
+                s_load = loadRate;
+                Spec_TXT.text = "Ammo: " + SpecAmmo + "/" + MaxAmmo;
+            }
+            SPEC_SLIDE.value = CalcSpecialLoad();
         }
-        if (!leftFire)
-        {
-            l_load -= Time.deltaTime;
-            if (l_load <= 0)
+        if (!leftFire) {//if left bar is empty
+            l_load += Time.deltaTime;
+            if (l_load >= loadRate) {
                 leftFire = true;
-            //endif
+                l_load = loadRate;
+            }
+            LEFT_SLIDE.value = CalcLeftLoad();
         }
-        if (!rghtFire)
-        {
-            r_load -= Time.deltaTime;
-            if (r_load <= 0)
+        if (!rghtFire) {//if right bar is empty
+            r_load += Time.deltaTime;
+            if (r_load >= loadRate) {
                 rghtFire = true;
-            //endif
+                r_load = loadRate;
+            }
+            RIGHT_SLIDE.value = CalcRightLoad();
         }
     }
-        
+
+    //sets firing conditions to false, and empty sliders of each bar
+    void S_Load()
+    {//begin calc return valves for loading variables
+        canFire = false;
+        s_load = 0;
+        SPEC_SLIDE.value = CalcSpecialLoad();
+    }
+    float CalcSpecialLoad()
+    {
+        return s_load;
+    } //end firing trig code
+    void L_Load()
+    {//begin calc return valves for loading variables
+        leftFire = false;
+        l_load = 0;
+        LEFT_SLIDE.value = CalcLeftLoad();
+    }
+    float CalcLeftLoad()
+    {
+        return l_load;
+    }
+    void R_Load()
+    {//begin calc return valves for loading variables
+        rghtFire = false;
+        r_load = 0;
+        RIGHT_SLIDE.value = CalcRightLoad();
+    }
+    float CalcRightLoad()
+    {
+        return r_load;
+    }
+
+    //update health variables if hit/est
+    void Hull_Update()
+    {
+        if (HP_Hull > HP_MAX) { HP_Hull = HP_MAX; }//jnc trigger
+        //endif
+        Hull_A = (HP_Hull / 100); //to get the 1f minimum
+        if (Hull_A < 0) { Hull_A = 0; }//so it doesn't go above 0
+        //end if, consider adding a "if above 1" variable as a consideration later
+        Hull_COL.a = Hull_A; //set transparency, should be at 1 approx.
+        if (HP_Hull <= 0)
+            Hull_TXT.text = "SUNK!";//then trigger sink death con?
+        else
+            Hull_TXT.text = "Hull:" + Math.Round(HP_Hull, 3) + "%";//rounds the digits down, JNC
+        //endif
+
+        Hull_HUD.color = Hull_COL;
+    }
+    void Sail_Update()
+    {
+        if (HP_Sail > HP_MAX) { HP_Sail = HP_MAX; }//jnc trigger
+        //endif
+        Sail_A = (HP_Sail / 100); //to get the 1f minimum
+        if (Sail_A < 0) { Sail_A = 0; }//so it doesn't go above 0
+        //end if, consider adding a "if above 1" variable as a consideration later
+        Sail_COL.a = Sail_A; //set transparency, should be at 1 approx.
+        if (HP_Sail <= 0)
+            Sail_TXT.text = "DOWN!";
+        else
+            Sail_TXT.text = "Sail:" + Math.Round(HP_Sail, 3) + "%";//rounds the digits down, JNC
+        //endif
+
+        //update SailSpeed, say?
+        Sail_HUD.color = Sail_COL;
+    }
 
 } 

@@ -11,6 +11,12 @@ TagManager:
   - Water
   - SailGUI
   - HullGUI
+  - LeftAmmoGUI
+  - RightAmmoGUI
+  - SpecialGUI
+  - SailTXT
+  - HullTXT
+  - SpecialTXT
   layers:
   - Default
   - TransparentFX
