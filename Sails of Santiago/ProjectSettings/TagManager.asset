@@ -17,6 +17,12 @@ TagManager:
   - SailTXT
   - HullTXT
   - SpecialTXT
+  - Terrain
+  - Hull
+  - Sail
+  - SailPoint
+  - PlayerShot
+  - EnemyShot
   layers:
   - Default
   - TransparentFX

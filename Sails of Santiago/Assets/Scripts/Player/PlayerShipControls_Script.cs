@@ -8,7 +8,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     //misc variable assets, tinker wise
     private Rigidbody RB;//for easy ref of the Rigidbody
-
+    //private GameObject shipRef;
     //GUI code
     private Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
         //health and est/ammo values
@@ -19,7 +19,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     private Text Hull_TXT, Sail_TXT, Spec_TXT; //for the text display, GUI edit wise
 
     //ship sail variables, (mostly) var less buggy now edition!
-    public GameObject Sails;
+    public GameObject Sails;//public, as find objects with tag ain't reliable for finding ONLY stuff inside an object, say.
     public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
     private float Max_SY, Min_SY, Max_SZ, Min_SZ, differ, diff_Z;//get sail heightness & thickness, along with sail difference state
     private bool Shrink, Growth = false;//is it rising/falling triggers
@@ -27,7 +27,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     //gun code, deals with firing and attack grabs
     public GameObject Projectile;//the 'basic ball'
-    private GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
+    public GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
     public bool canFire, leftFire, rghtFire = true;//fire triggers, cue firing pins.
         //rate of fire
     private float loadRate = 1F;//approx. 1 second or such, to start?
@@ -58,11 +58,14 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-
-        //set sail's pre-emptively est.
-        //set up the projectiles, update auto wiser.
+            //shipRef = this.gameObject;        //no need, as sails should be better done manually, in case of glitches/est.
+        //set sail's pre-emptively est. Long term, figure out how to do so more efficiently
+        //Sails = GameObject.FindGameObjectWithTag("SailPoint");//singular, as it only needs to grab the flag and such
+            //transform.Find("CheapShip/Mast/SailPivot").gameObject;//buggy
+            //
+        //set up the projectiles, update auto wiser. FindWithTag works, since it's linked to the player itself.
         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
-        LeftGuns = GameObject.FindGameObjectsWithTag("P_LeftCannon");
+        LeftGuns = GameObject.FindGameObjectsWithTag ("P_LeftCannon");
         RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
         //pre-empt set move to zero, caution wise.
         Rotation = 0;
@@ -143,11 +146,36 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //TestVoider();
     }
 
+    public void SailDamage(float amount) {//by amount
+        HP_Sail -= amount; //take away by amount
+        Sail_Update();
+    }
+
+    public void HullDamage(float amount) {//by amount
+        HP_Hull -= amount; //take away by amount
+        Hull_Update();
+    }
+
+    /*doesn't work. Perhaps external calls may help?
         //code for enemies, if crashed upon for later testing
-    /*private*/ void OnTriggerEnter(Collider other)//if crashing say
+    private void OnTriggerEnter(Collider other)//if crashing say
+    {
+        if (other.gameObject.tag == "EnemyShot") {
+            Debug.Log("It hitted!");
+            if (this.tag == "Sail")
+            {
+                HP_Sail -= 10;
+                Sail_Update();
+            }
+            else if (this.tag == "Hull") {
+                HP_Hull -= 10;
+                Hull_Update();
+            }
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
     {}
-    /*private*/ void OnCollisionEnter(Collision collision)
-    {}
+    */
 
     /*void TestVoider() {///test prefabs, to check hp updates work
         if (Input.GetKeyDown(KeyCode.K)) {
@@ -331,11 +359,11 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     void GUICode() {
         //ammo part
-        if (!canFire && (SpecAmmo > 0)) {//if special bar is empty
+        if (!canFire /*&& (SpecAmmo > 0)*/) {//if special bar is empty, disabled for now for testing purposes, as it works.
             s_load += Time.deltaTime;
             if (s_load >= loadRate) {
-                if (!canFire)
-                    SpecAmmo--;
+                //if (!canFire)
+                //    SpecAmmo--;
                 //endif
                 canFire = true;
                 s_load = loadRate;
