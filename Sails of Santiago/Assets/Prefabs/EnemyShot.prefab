@@ -24,7 +24,6 @@ GameObject:
   - component: {fileID: 23078531346506490}
   - component: {fileID: 54856009352310100}
   - component: {fileID: 114344354444214098}
-  - component: {fileID: 135588227237246794}
   m_Layer: 0
   m_Name: EnemyShot
   m_TagString: EnemyShot
@@ -39,7 +38,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1736521756390934}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 9.198, z: 13.28}
+  m_LocalPosition: {x: 1, y: 9.48, z: 18.45}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -117,18 +116,6 @@ MonoBehaviour:
   lifeSpan: 10
   waterFlag: 0
   hitFlag: 0
---- !u!135 &135588227237246794
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1736521756390934}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.6
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &135761861084080154
 SphereCollider:
   m_ObjectHideFlags: 1

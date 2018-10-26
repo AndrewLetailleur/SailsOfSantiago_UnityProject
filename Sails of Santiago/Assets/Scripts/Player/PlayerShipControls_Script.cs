@@ -146,14 +146,49 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //TestVoider();
     }
 
-    public void SailDamage(float amount) {//by amount
-        HP_Sail -= amount; //take away by amount
+    public void SailDamage(float damage) {//by amount
+        HP_Sail -= damage; //take away by amount
         Sail_Update();
     }
 
-    public void HullDamage(float amount) {//by amount
-        HP_Hull -= amount; //take away by amount
+    public void HullDamage(float damage) {//by amount
+        HP_Hull -= damage; //take away by amount
         Hull_Update();
+    }
+
+    //update health variables if hit/est
+    void Hull_Update()
+    {
+        if (HP_Hull > HP_MAX) { HP_Hull = HP_MAX; }//jnc trigger
+        //endif
+        Hull_A = (HP_Hull / 100); //to get the 1f minimum
+        if (Hull_A < 0) { Hull_A = 0; }//so it doesn't go above 0
+        //end if, consider adding a "if above 1" variable as a consideration later
+        Hull_COL.a = Hull_A; //set transparency, should be at 1 approx.
+        if (HP_Hull <= 0)
+            Hull_TXT.text = "SUNK!";//then trigger sink death con?
+        else
+            Hull_TXT.text = "Hull:" + Math.Round(HP_Hull, 3) + "%";//rounds the digits down, JNC
+        //endif
+
+        Hull_HUD.color = Hull_COL;
+    }
+    void Sail_Update()
+    {
+        if (HP_Sail > HP_MAX) { HP_Sail = HP_MAX; }//jnc trigger
+        //endif
+        Sail_A = (HP_Sail / 100); //to get the 1f minimum
+        if (Sail_A < 0) { Sail_A = 0; }//so it doesn't go above 0
+        //end if, consider adding a "if above 1" variable as a consideration later
+        Sail_COL.a = Sail_A; //set transparency, should be at 1 approx.
+        if (HP_Sail <= 0)
+            Sail_TXT.text = "DOWN!";
+        else
+            Sail_TXT.text = "Sail:" + Math.Round(HP_Sail, 3) + "%";//rounds the digits down, JNC
+        //endif
+
+        //update SailSpeed, say?
+        Sail_HUD.color = Sail_COL;
     }
 
     /*doesn't work. Perhaps external calls may help?
@@ -421,39 +456,6 @@ public class PlayerShipControls_Script : MonoBehaviour {
         return r_load;
     }
 
-    //update health variables if hit/est
-    void Hull_Update()
-    {
-        if (HP_Hull > HP_MAX) { HP_Hull = HP_MAX; }//jnc trigger
-        //endif
-        Hull_A = (HP_Hull / 100); //to get the 1f minimum
-        if (Hull_A < 0) { Hull_A = 0; }//so it doesn't go above 0
-        //end if, consider adding a "if above 1" variable as a consideration later
-        Hull_COL.a = Hull_A; //set transparency, should be at 1 approx.
-        if (HP_Hull <= 0)
-            Hull_TXT.text = "SUNK!";//then trigger sink death con?
-        else
-            Hull_TXT.text = "Hull:" + Math.Round(HP_Hull, 3) + "%";//rounds the digits down, JNC
-        //endif
-
-        Hull_HUD.color = Hull_COL;
-    }
-    void Sail_Update()
-    {
-        if (HP_Sail > HP_MAX) { HP_Sail = HP_MAX; }//jnc trigger
-        //endif
-        Sail_A = (HP_Sail / 100); //to get the 1f minimum
-        if (Sail_A < 0) { Sail_A = 0; }//so it doesn't go above 0
-        //end if, consider adding a "if above 1" variable as a consideration later
-        Sail_COL.a = Sail_A; //set transparency, should be at 1 approx.
-        if (HP_Sail <= 0)
-            Sail_TXT.text = "DOWN!";
-        else
-            Sail_TXT.text = "Sail:" + Math.Round(HP_Sail, 3) + "%";//rounds the digits down, JNC
-        //endif
-
-        //update SailSpeed, say?
-        Sail_HUD.color = Sail_COL;
-    }
+ 
 
 } 
