@@ -23,6 +23,7 @@ TagManager:
   - SailPoint
   - PlayerShot
   - EnemyShot
+  - Enemy
   layers:
   - Default
   - TransparentFX
