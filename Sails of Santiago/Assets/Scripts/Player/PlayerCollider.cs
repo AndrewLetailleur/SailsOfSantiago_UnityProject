@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+/* Code Written by; Andrew Letailleur (2018) */
 
 public class PlayerCollider : MonoBehaviour {
 
@@ -10,15 +11,21 @@ public class PlayerCollider : MonoBehaviour {
     ///     it calls upon the damage function on a hull or sail for the player
     /// </summary> Was split into Sail and Hull collider's, but I simplified the code to a universal one, ish. ;)
 
-    public GameObject hitbox;/*set as linked to parent, hack wiser*/
+        ///ps, sollution found in enemy script has been parraelled here, since it's less assets managed/est
+
+    //no longer needed public GameObject hitbox;/*set as linked to parent, hack wiser*/
     private PlayerShipControls_Script playRef; /*the script itself, player only wise*/
     public float damage = 10f; //test variable
     public bool Saily, Hully = false;/*test triggers*/
 
     // Use this for initialization
     void Start() {
-        hitbox = GameObject.FindGameObjectWithTag("Player");
-        playRef = hitbox.GetComponent<PlayerShipControls_Script>();//grab the script
+            ///OldCode
+        /*  hitbox = GameObject.FindGameObjectWithTag("Player");
+            playRef = hitbox.GetComponent<PlayerShipControls_Script>();//grab the script
+        */
+                //better, more efficient code
+        playRef = GetComponentInParent<PlayerShipControls_Script>();//grab the script
 
         if (this.gameObject.tag == "Hull")
             Hully = true;
