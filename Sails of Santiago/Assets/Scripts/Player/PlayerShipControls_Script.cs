@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;//needed for navmesh components
 /* Code Written by; Andrew Letailleur (2018) */
 
 public class PlayerShipControls_Script : MonoBehaviour {
@@ -13,14 +14,15 @@ public class PlayerShipControls_Script : MonoBehaviour {
     ///GUI & Stats code, later link/grab dependencies from upgrades
         //GUI Sliders/est
     private Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
-        //health and est/ammo values
-    private float HP_MAX = 100f;//set at 100, and floaty for maximum compatibility on percentages
+        //health and est/ammo values, stat wise
+    public float HP_MAX = 100f;//set at 100, and floaty for maximum compatibility on percentages
     private float Sail_A, HP_Sail, Hull_A, HP_Hull; //to edit the Alpha values of images, and acquire/set the health of those assets
+        //GUI stuff
     private Image Sail_HUD, Hull_HUD;//for the GUI images, edit wise
     private Color Sail_COL, Hull_COL;//to grab the colors, alpha edit wise
     private Text Hull_TXT, Sail_TXT, Spec_TXT; //for the text display, GUI edit wise
 
-    //ship sail variables, (mostly) var less buggy now edition!
+    ///ship sail variables, (mostly) var less buggy now edition!
     private GameObject Sails;//public, as find objects with tag ain't reliable for finding ONLY stuff inside an object, say.
     public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
     private float Max_SY, Min_SY, Max_SZ, Min_SZ, differ, diff_Z;//get sail heightness & thickness, along with sail difference state
