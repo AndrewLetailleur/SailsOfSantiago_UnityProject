@@ -8,6 +8,13 @@ public class BaseEnemyScript : MonoBehaviour {
 
     //keep things public for now. Private when need be.
 
+
+
+    private float Max_FireRate = 5f;
+    private float FireRate = 0f;
+    private bool Loaded = true;
+
+        //HP variables
     public float HP_Max = 100F; //test prefab, unused assets are /*commented out*/
     public float HP_Test; /*HP_Sail, HP_Hull;*/
     //test being there for testy purposes
@@ -15,30 +22,42 @@ public class BaseEnemyScript : MonoBehaviour {
         //misc references to components
     public Transform target; //who the ship will chase after
     private Rigidbody RB;//the rigidbody
-    public NavMeshAgent nav; //... May need to look on tutorials on recent versions, 
+        //
+    public NavMeshAgent agent; //... May need to look on tutorials on recent versions, 
+    public NavMeshPath path;
+        //movement variables
+    public float distance;//distance
+    private float min_dist = 45f;//for now
+
 
     //enemy ship attack variables
     public GameObject[] AttackGuns;/*LeftGuns, RightGuns;*/
-    //
-
-    public GameObject Projectile; //the enemy projectile
+    //leave AttackGuns for now, since it's coding hassle in getting the children
+    public GameObject Projectile; //the enemy projectile, leave public for editing
 
 
 	// Use this for initialization
 	void Start () {
-
         target = GameObject.FindGameObjectWithTag("Player").transform; //position wise
-        nav = GetComponent<NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
+        path = GetComponent<NavMeshPath>();//get THE path, per say?
         RB = GetComponent<Rigidbody>();
+        
 
         //        HP_Hull = HP_Max;
         //        HP_Sail = HP_Max;
         HP_Test = HP_Max;
         HP_Update();
 	}
+
+
+
 	
 	// Update is called once per frame
-	void Update () {
+	private void Update () {
+        MoveShip();
+
+
         //vertical control & horizontal control
             //MoveShip();, RotateShip(); //by AI Troopers
         //buggy pirate flag code. Now with only toscale woes!
@@ -54,10 +73,34 @@ public class BaseEnemyScript : MonoBehaviour {
     //begin movement code hack
 
 
+    public GameObject ShipLeft, ShipRight;
 
+    public bool trig = false;
 
+    private void MoveShip() {
+        //path pending?
 
+        RaycastHit hit;
+        Ray fireRayTest = new Ray(ShipLeft.transform.position, Vector3.right);//test
 
+        if (Physics.Raycast(fireRayTest, out hit)) {
+            if (hit.collider.tag == "Player")
+                Debug.Log("Hitting player!");
+            //endif
+        }//end if, thank hit for being a collider tag
+
+        if (target/*dist is set*/)
+        {
+            agent.enabled = true;
+            agent.SetDestination(target.position);//send to target destination
+        }
+        else
+            agent.enabled = false;
+        //endif
+
+        //blah blah if AT near enough, fire guns if aroud side?
+            //TODO LATER, figure out how to get the enemy to 'circle' around the player, obstacle wise.
+    }
 
     public void TestDamage(float damage)
     {//by amount

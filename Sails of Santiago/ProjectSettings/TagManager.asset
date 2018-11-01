@@ -24,6 +24,7 @@ TagManager:
   - PlayerShot
   - EnemyShot
   - Enemy
+  - E_Cannon
   layers:
   - Default
   - TransparentFX
