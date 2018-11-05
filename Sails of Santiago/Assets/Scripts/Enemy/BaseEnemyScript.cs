@@ -25,6 +25,7 @@ public class BaseEnemyScript : MonoBehaviour {
         //
     public NavMeshAgent agent; //... May need to look on tutorials on recent versions, 
     public NavMeshPath path;
+    public Vector3[] PlayerPaths;
         //movement variables
     public float distance;//distance
     private float min_dist = 45f;//for now
@@ -50,11 +51,26 @@ public class BaseEnemyScript : MonoBehaviour {
         HP_Update();
 	}
 
+    private void PlayerPathsFunction() {
 
+        float var = 5f;
+
+        for (int i = 0; i < PlayerPaths.Length; i++) {
+            PlayerPaths[i] = target.position;
+            PlayerPaths[i].y = this.transform.position.y; //to harmonise the y co-ordinate, hack wise.
+        }
+        PlayerPaths[0].x += var;
+        PlayerPaths[1].x -= var;
+        PlayerPaths[2].z += var;
+        PlayerPaths[3].z -= var;
+    }
 
 	
 	// Update is called once per frame
 	private void Update () {
+
+        PlayerPathsFunction();
+
         MoveShip();
 
 

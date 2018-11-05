@@ -1882,6 +1882,7 @@ Transform:
   m_Children:
   - {fileID: 106856681}
   - {fileID: 2006346673}
+  - {fileID: 2126307683}
   - {fileID: 735029047}
   m_Father: {fileID: 88321634}
   m_RootOrder: 0
@@ -1985,7 +1986,7 @@ Transform:
   m_LocalScale: {x: 150, y: 1, z: 151}
   m_Children: []
   m_Father: {fileID: 601238863}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &735029048
 MeshRenderer:
@@ -5856,6 +5857,11 @@ MonoBehaviour:
   HP_Test: 0
   target: {fileID: 0}
   agent: {fileID: 0}
+  PlayerPaths:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
   distance: 0
   AttackGuns:
   - {fileID: 1549569759}
@@ -5912,7 +5918,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 16
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -6064,12 +6070,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2126307681}
-  m_LocalRotation: {x: -0.3329595, y: 0.048065048, z: 0.016997611, w: 0.94156194}
-  m_LocalPosition: {x: -23.658043, y: -10.612471, z: 2.2314014}
+  m_LocalRotation: {x: -0.4041865, y: 0.034291495, z: 0.015166468, w: 0.91390777}
+  m_LocalPosition: {x: -17.831146, y: -25.997074, z: -9.201612}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_Father: {fileID: 601238863}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2129245700
 GameObject:
