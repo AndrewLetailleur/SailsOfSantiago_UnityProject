@@ -2,33 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;//adds/uses NavMeshAgent, ref wise
+//using System; //for Array, hack wise. NLN
 /* Code Written by; Andrew Letailleur (2018) */
 
 public class BaseEnemyScript : MonoBehaviour {
 
     //keep things public for now. Private when need be.
-
-
-
-    private float Max_FireRate = 5f;
+    
+    private float Max_FireRate = 1.8f;
     private float FireRate = 0f;
     private bool Loaded = true;
 
         //HP variables
     public float HP_Max = 100F; //test prefab, unused assets are /*commented out*/
-    public float HP_Test; /*HP_Sail, HP_Hull;*/
-    //test being there for testy purposes
+    private float HP_Test; /*HP_Sail, HP_Hull;*/
+                           //test being there for testy purposes
 
         //misc references to components
-    public Transform target; //who the ship will chase after
+    private Transform target; //who the ship will chase after
     private Rigidbody RB;//the rigidbody
         //
     public NavMeshAgent agent; //... May need to look on tutorials on recent versions, 
     public NavMeshPath path;
-    public Vector3[] PlayerPaths;
+    //public Vector3[] PlayerPaths;
         //movement variables
     public float distance;//distance
-    private float min_dist = 45f;//for now
+    private float min_dist = 50f;//for now
 
 
     //enemy ship attack variables
@@ -41,7 +40,7 @@ public class BaseEnemyScript : MonoBehaviour {
 	void Start () {
         target = GameObject.FindGameObjectWithTag("Player").transform; //position wise
         agent = GetComponent<NavMeshAgent>();
-        path = GetComponent<NavMeshPath>();//get THE path, per say?
+        //path = GetComponent<NavMeshPath>();//get THE path, per say?
         RB = GetComponent<Rigidbody>();
         
 
@@ -49,28 +48,24 @@ public class BaseEnemyScript : MonoBehaviour {
         //        HP_Sail = HP_Max;
         HP_Test = HP_Max;
         HP_Update();
-	}
-
-    private void PlayerPathsFunction() {
-
-        float var = 5f;
-
-        for (int i = 0; i < PlayerPaths.Length; i++) {
-            PlayerPaths[i] = target.position;
-            PlayerPaths[i].y = this.transform.position.y; //to harmonise the y co-ordinate, hack wise.
-        }
-        PlayerPaths[0].x += var;
-        PlayerPaths[1].x -= var;
-        PlayerPaths[2].z += var;
-        PlayerPaths[3].z -= var;
-    }
-
+	} 
 	
 	// Update is called once per frame
 	private void Update () {
 
-        PlayerPathsFunction();
+        //PlayerPathsFunction();//[REDACTED] for now, as it's non-functioning
+        distance = Vector3.Distance(target.position, transform.position);//get distance on a 2D plane
 
+        if (!Loaded)
+        {
+            FireRate -= Time.deltaTime;
+            if (FireRate <= 0)
+                Loaded = true;
+            //endif
+        }
+        else if (distance <= min_dist) {
+            ShipAttack();
+        }//endif
         MoveShip();
 
 
@@ -85,6 +80,28 @@ public class BaseEnemyScript : MonoBehaviour {
                   //testground for stuff
                   //TestVoider();
     }
+
+    void ShipAttack() {
+
+        float GunVelo = ((agent.speed / 4) + 1) * 1024;
+
+        if (GunVelo > 2048)
+            GunVelo = 2048;
+
+        for (int i = 0; i < AttackGuns.Length; i++)
+        {
+            //spawn an internal GameObject, to further manipulate with force addition, dependant on ship speed
+            //code as is should be flexible, if/when rotation becomes an issue, later on.
+            GameObject Bullet = Instantiate(Projectile, AttackGuns[i].transform.position, AttackGuns[i].transform.rotation) as GameObject;
+            Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
+            BulletRB.AddForce(AttackGuns[i].transform.forward * (GunVelo * 3 / 2));
+            BulletRB.AddForce(AttackGuns[i].transform.up * (GunVelo / 2));
+            //	Debug.Log ("Open Fire!");
+        }
+        FireRate = Max_FireRate;//reset fire rate
+        Loaded = false;//attackcode
+    }
+
 
     //begin movement code hack
 
@@ -105,17 +122,29 @@ public class BaseEnemyScript : MonoBehaviour {
             //endif
         }//end if, thank hit for being a collider tag
 
-        if (target/*dist is set*/)
+        //hack movement test, guess hack wise
+        if (distance <= min_dist)
         {
-            agent.enabled = true;
-            agent.SetDestination(target.position);//send to target destination
+            //agent.enabled = true;
+            Vector3 offsetPlayer = target.position - transform.position;
+            Vector3 dir = Vector3.Cross(offsetPlayer, Vector3.up);
+            agent.SetDestination(transform.position + dir);
+            //agent.SetDestination(target.position);//send to target destination
         }
         else
-            agent.enabled = false;
+            agent.SetDestination(target.position);//send to target destination
         //endif
+        //agent.enabled = false;
+                                                    
+
+        
+
+
+
+
 
         //blah blah if AT near enough, fire guns if aroud side?
-            //TODO LATER, figure out how to get the enemy to 'circle' around the player, obstacle wise.
+        //TODO LATER, figure out how to get the enemy to 'circle' around the player, obstacle wise.
     }
 
     public void TestDamage(float damage)

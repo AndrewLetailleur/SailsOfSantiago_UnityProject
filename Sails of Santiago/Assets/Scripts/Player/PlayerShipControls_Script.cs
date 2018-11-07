@@ -335,8 +335,8 @@ public class PlayerShipControls_Script : MonoBehaviour {
             //firing code "works" for now, but needs some fine tuning both on code end, and asset end. Pointer wise.
         if (Input.GetKeyDown("space") && canFire) {//think of how to dodge a fore loop?
             for (int i = 0; i < AttackGuns.Length; i++) {
-                //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
-                //this can also be additionally useful, if/when rotation becomes an issue, later on.
+                //spawn an internal GameObject, to further manipulate with force addition, depending on current ship speed.
+                //code as is should be flexible, if/when rotation becomes an issue, later on.
                 GameObject Bullet = Instantiate(Projectile, AttackGuns[i].transform.position, AttackGuns[i].transform.rotation) as GameObject;
                 Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
                 BulletRB.AddForce(AttackGuns[i].transform.forward * (GunVelo * 3 / 2));
@@ -350,8 +350,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         {//think of how to dodge a fore loop?
             for (int i = 0; i < LeftGuns.Length; i++)
             {
-                //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
-                //this can also be additionally useful, if/when rotation becomes an issue, later on.
+                //same logic as specical fire, sans special
                 GameObject Bullet = Instantiate(Projectile, LeftGuns[i].transform.position, LeftGuns[i].transform.rotation) as GameObject;
                 Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
                 BulletRB.AddForce(LeftGuns[i].transform.forward * (GunVelo * 3 / 2));
@@ -366,8 +365,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         {//think of how to dodge a fore loop?
             for (int i = 0; i < RightGuns.Length; i++)
             {
-                //spawn an internal GameObject, to further manipulate with force addition, depending on current knot speed.
-                //this can also be additionally useful, if/when rotation becomes an issue, later on.
+                //same logic as specical fire, sans special
                 GameObject Bullet = Instantiate(Projectile, RightGuns[i].transform.position, RightGuns[i].transform.rotation) as GameObject;
                 Rigidbody BulletRB = Bullet.GetComponent<Rigidbody>();
                 BulletRB.AddForce(RightGuns[i].transform.forward * (GunVelo * 3 / 2));
