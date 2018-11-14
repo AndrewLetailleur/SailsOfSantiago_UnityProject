@@ -1,4 +1,4 @@
-﻿using System;//for math functionality, to the power of
+﻿using System;//for math functionality, to the power of, and C# power!
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,39 +7,38 @@ using UnityEngine.AI;//needed for navmesh components
 /* Code Written by; Andrew Letailleur (2018) */
 
 public class PlayerShipControls_Script : MonoBehaviour {
-
     //general rule of code here; MAX values are not private, for easy editing. General values are however, private.
         //only exception is assets that are a hassle to link otherwise; in which case they're assigned public
 
     ///GUI & Stats code, later link/grab dependencies from upgrades
-        //GUI Sliders/est
-    private Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
+    public Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
         //health and est/ammo values, stat wise
-    public float HP_MAX = 100f;//set at 100, and floaty for maximum compatibility on percentages
-    private float Sail_A, HP_Sail, Hull_A, HP_Hull; //to edit the Alpha values of images, and acquire/set the health of those assets
-        //GUI stuff
-    private Image Sail_HUD, Hull_HUD;//for the GUI images, edit wise
-    private Color Sail_COL, Hull_COL;//to grab the colors, alpha edit wise
-    private Text Hull_TXT, Sail_TXT, Spec_TXT; //for the text display, GUI edit wise
-
-    ///ship sail variables, (mostly) var less buggy now edition!
-    private GameObject Sails;//public, as find objects with tag ain't reliable for finding ONLY stuff inside an object, say.
-    public Vector3 SailScale;//diff from Float, should take into account all the scale, for less hassle.
-    private float Max_SY, Min_SY, Max_SZ, Min_SZ, differ, diff_Z;//get sail heightness & thickness, along with sail difference state
-    private bool Shrink, Growth = false;//is it rising/falling triggers
-        //do not touch POS/itioning of the sails themselves; as that's a nightmare in technical difficulties, glitch wise
-
-    //gun code, deals with firing and attack grabs
+    public float HP_MAX = 100f;                         //set at 100    And floaty for maximum compatibility on percentages
+    private float Sail_A, HP_Sail, Hull_A, HP_Hull;     //Health        to edit the Alpha values of images, and acquire/set the health of those assets
+    private int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
+    private int SpecAmmo;//the current amount of ammo, int wise
+         //GUI stuff, make public due to glitchy hell
+    public Image Sail_HUD, Hull_HUD;           //for the GUI images,    icon wise
+    public Color Sail_COL, Hull_COL;           //for the colors,       alpha wise
+    public Text Hull_TXT, Sail_TXT, Spec_TXT;  //for the text display,   TXT wise
+    
+    //gun code, deals with firing and attack grabs. Currently WAY not working
     public GameObject Projectile;//the 'basic ball'
-    private GameObject[] AttackGuns, LeftGuns, RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
-    private bool canFire, leftFire, rghtFire = true;//fire triggers, cue firing pins.
+    public GameObject[] AttackGuns;
+    public GameObject[] LeftGuns;
+    public GameObject[] RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
+    private bool canFire, leftFire, rightFire = true;//fire triggers, cue firing pins.
         //rate of fire
     private float loadRate = 1F;//approx. 1 second or such, to start?
     private float s_load, l_load, r_load = 0f;//loading times, reset upon fire
         //special ammo
-    private int MaxAmmo = 21;//prefab test for now, to ensue there's special ammo in toe. Should be int, bar floaty timer shenanigans with dragon fire?
-    private int SpecAmmo;//the current amount of ammo
-    
+        
+    ///ship sail variables, now with more (buggy) List-y Arrays edition! (For maximum scalability)
+    public List<GameObject> Sails  = new List<GameObject>();            //Get from children, as find objects with tag ain't reliable for finding ONLY stuff inside an object, say.
+    public List<Vector3> SailScale = new List<Vector3>();               //ToGet Transform, to take into account the scale, for less hassle.
+    private List<float> Max_SY, Min_SY, Max_SZ, Min_SZ, differ, diff_Z = new List<float>(); //get sail heightness & thickness, along with sail difference state
+    private bool Shrink, Growth = false;//is it rising/falling triggers
+        //do not touch POS/itioning of the sails themselves; as that's a nightmare in technical difficulties, glitch wise
 
     /// <summary> Later variables when tinkering is allowed. Mainly future proofing
     /// //StatusCode
@@ -49,42 +48,80 @@ public class PlayerShipControls_Script : MonoBehaviour {
     /// //est?
     /// </summary>
     
-    
     //movement code, as we have to get transport/est from somewhere. Ideally, should push momentum, not transport an object.
-
         //movement variables
-    private float Velocity; //current velocity
-    private float MinVelocity = 0.1f; //private, since min HAS to be set at Zero. Hindsight, mag 
-    private float CurMaxVelocity;//actual max velocity, dependant on sail health.
-    public float MaxVelocity = 25f;//THE Max velocity, made public for easy access/edit by inspector.
+    private float Velocity, CurMaxVelocity;   //current velocity, and actual max velocity, dependant on sail health.
+    private float MinVelocity = 0.1f;   //lowest velocity, before zero
+    public float MaxVelocity = 25f;     //THE MAX velocity, made public for easy access/edit by inspector.
         //rotationary
     private float Rotation;
     public float MaxRotation = 5f;//THE Max rotation, made public for easy access/edit by inspector.
         //acceleration
     public float Accel = 1f;
     public float Speed;//same as Max Rotation and Velocity, yet kept public for now for easy reference.
-        //misc physics, tinker wise
+        //misc variables, physics tinker wise
     private Rigidbody RB;//for easy ref of the Rigidbody
-    //end of player variables
-
+    private int g_i, t_i;//for easier index hassle purposes
     // Use this for initialization
     void Start() {
-        
+
         /// <summary> newer hack attempt on more efficient grabbing object. Reference/s;
         /// https://answers.unity.com/questions/787538/how-do-i-find-a-child-object-in-a-hierarchy-of-chi.html
         /// </summary>
-        Transform[] SailCheck = GetComponentsInChildren<Transform>();
-        foreach (Transform check in SailCheck) {
+
+        RB = GetComponent<Rigidbody>();//sets the RB
+        //RB = this.GetComponent<Rigidbody>();
+                                            
+        //get the variables, for a lazy check and add on start
+        GameObject[] g_check = GetComponentsInChildren<GameObject>();
+        foreach (GameObject check in g_check) {
             if (check.CompareTag("SailPoint")) {
-                Sails = check.gameObject; //add the check as game object, hack test
+                Sails.Add(check);
+                Debug.Log(check.name + " Found!");
+                //[].game = check.gameObject; //add the check as game object, hack test
             }
         }//end foreach
-        //end nicely efficient get that SailCheck
- 
-        //set up the projectiles, update auto wiser. FindWithTag works in this case, since it's linked only to the player itself.
+        
+        //get the scale of the actual transforms
+        Transform[] t_check = GetComponentsInChildren<Transform>();
+        foreach (Transform check in t_check)
+        {
+            if (check.CompareTag("SailPoint"))
+            {
+                SailScale.Add(check.localScale);//we only need the local scale, out of the transformation of a game object
+                Debug.Log(check.name + " Found!");
+            }
+        }//end foreach
+
+        //SailScale = Sails.transform.localScale; //this code calcs, assuming the sails are fully down at the start.
+        for (int i = 0; i <= SailScale.Count; i++)
+        {//note, Count =/= Length
+            SailScale[i] = Sails[i].transform.localScale;//hack attemptA
+                                                         
+            Max_SY.Add(SailScale[i].y);     //y height var
+            Min_SY.Add(Max_SY[i] / 20); //Scale of 1 / 20 = 0.05
+            differ.Add(Max_SY[i] - Min_SY[i]);
+            
+            Min_SZ.Add(SailScale[i].z);     //z width var
+            Max_SZ.Add(Min_SZ[i] * 4); // scale of 1 / 4, from sails unfurled.
+            diff_Z.Add(Max_SZ[i] - Min_SZ[i]);
+
+            //set sail scale, Vector Set wise.
+            SailScale[i].Set(SailScale[i].x, Max_SY[i], Max_SZ[i]);//keeping to max_SY instead of min_SY, for sanity reasons.
+            Sails[i].transform.localScale = SailScale[i];
+            //end set up
+        } 
+         
+        //set up/grab ALL the projectiles, update auto wiser. FindWithTag works in this case, since it's linked only to the player itself.
+
+
+       /*
+
         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
         LeftGuns = GameObject.FindGameObjectsWithTag ("P_LeftCannon");
         RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
+
+        */
         //pre-empt set move to zero, caution wise.
         Rotation = 0; Velocity = 0;
 
@@ -125,23 +162,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         Sail_Update();
         //end GUI set & update on health variables
 
-            //finally uses/assigns the rigid body onto RB, for RigidBodyness.
-        RB = this.GetComponent<Rigidbody>();//sets the RB
-            //get the scale of the actual transforms
-        SailScale = Sails.transform.localScale; //this code calcs, assuming the sails are fully down at the start.
-            //y height var
-        Max_SY = SailScale.y;
-        Min_SY = Max_SY / 20; //Scale of 1 / 20 = 0.05
-        differ = Max_SY - Min_SY;
-            //z width var
-        Min_SZ = SailScale.z;
-        Max_SZ = Min_SZ * 4; // scale of 1 / 4, from sails unfurled.
-        diff_Z = Max_SZ - Min_SZ;
-            //set sail scale
-        SailScale.y = Min_SY;//set to zero, as there's no movement.
-        SailScale.z = Max_SZ;//that means, sails are all rolled up and padded
-        Sails.transform.localScale = SailScale;
-        //end set up
+
     }
 
 
@@ -154,7 +175,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //horizontal control
         RotateShip();
         //buggy pirate flag code. Now with only toscale woes!
-        ChangeSails();
+        //ChangeSails();
         //combat code
         ShipAttack();//check firing pin's afterwards
         //the GUI
@@ -248,7 +269,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //end if
 
         //set velocity to current magnitute in velocity
-        Velocity = RB.velocity.magnitude;
+        Velocity = RB.velocity.magnitude;//currently buggy, hassle wise
 
         //part 2,momentum
         RB.AddForce(transform.forward * (Speed * Accel));
@@ -278,50 +299,83 @@ public class PlayerShipControls_Script : MonoBehaviour {
     }
 
     //Shift the sails, visual effect.
+    //Shift the sails, visual effect.
     void ChangeSails()
     {
-        if (Shrink) {
-            if ((SailScale.y - Time.deltaTime <= Min_SY)) {
-                SailScale.y = Min_SY;
-                SailScale.z = Max_SZ;
-            } else {
-                SailScale.y -= Time.deltaTime;//(Time.deltaTime / 10);
-                if (SailScale.z + (Time.deltaTime) <= Max_SZ)
-                    SailScale.z += (Time.deltaTime); //hack test, unthicken
+
+        //[i], replacing everything. It's good as an [i]nformative for FOR loop triggers. :P
+        if (Shrink)
+        {
+            for (int i = 0; i < SailScale.Count; i++)
+            {
+                if ((SailScale[i].y - Time.deltaTime <= Min_SY[i]))
+                {
+                    SailScale[i].Set(SailScale[i].x, Min_SY[i], SailScale[i].z);
+                }
                 else
-                    SailScale.z = Max_SZ;
-                //end if checker
-            }
+                {
+                    float t_y = SailScale[i].y; t_y -= Time.deltaTime;//(Time.deltaTime / 10);
+                    SailScale[i].Set(SailScale[i].x, t_y, SailScale[i].z);
+
+                    /*
+                    if (SailScale[i].z + (Time.deltaTime) <= Max_SZ[i])
+                        SailScale[i].z += (Time.deltaTime); //hack test, unthicken
+                    else
+                        SailScale[i].z = Max_SZ[i];
+                    */
+                }//end if checker
+            }//end for loop
+
         }//endif 
-        if (Growth) {
-            if ((SailScale.y + Time.deltaTime >= Max_SY)) { 
-                SailScale.y = Max_SY;
-                SailScale.z = Min_SZ;
-            } else { 
-                SailScale.y += Time.deltaTime;//(Time.deltaTime / 10);
-                if (SailScale.z - (Time.deltaTime) >= Min_SZ)
-                    SailScale.z -= (Time.deltaTime); //hack test, unthicken
+        if (Growth)
+        {
+            for (int i = 0; i < SailScale.Count; i++)
+            {
+                if ((SailScale[i].y + Time.deltaTime >= Max_SY[i]))
+                {
+                    SailScale[i].Set(SailScale[i].x, Max_SY[i], SailScale[i].z);
+                }
                 else
-                    SailScale.z = Min_SZ;
-                //end if checker
-            }
+                {
+                    float t_y = SailScale[i].y; t_y += Time.deltaTime;//(Time.deltaTime / 10);
+                    SailScale[i].Set(SailScale[i].x, t_y, SailScale[i].z);
+                }//end if checker
+
+
+
+                /* if (SailScale[i].z - (Time.deltaTime) >= Min_SZ[i])
+                   SailScale[i].z -= (Time.deltaTime); //hack test, unthicken
+               else
+                   SailScale[i].z = Min_SZ[i];
+               */
+
+
+
+            }//end for loop
         }//endif
 
-        Sails.transform.localScale = SailScale;//the rescaling. Do NOT touch position.
+        for (int i = 0; i < SailScale.Count; i++)
+        {
+            Sails[i].transform.localScale = SailScale[i];//the rescaling. Do NOT touch position.
+            //max speed dependant on scale size
+            differ[i] = Max_SY[i] - Min_SY[i];
 
-        //max speed dependant on scale size
-        differ = Max_SY - Min_SY;
-        if (SailScale.y - Min_SY >= (differ / 4 * 3)) 
-            CurMaxVelocity = differ * 20;
-        else if (SailScale.y - Min_SY >= (differ / 2))
-            CurMaxVelocity = differ * 10;
+        }//endfor
+
+        int last_i = SailScale.Count - 1;//not quite, but hack should work
+        //get last
+        if (SailScale[last_i].y - Min_SY[SailScale.Count - 1] >= (differ[last_i] / 4 * 3))
+            CurMaxVelocity = differ[last_i] * 20;
+        else if (SailScale[last_i].y - Min_SY[last_i] >= (differ[last_i] / 2))
+            CurMaxVelocity = differ[last_i] * 10;
         else
-            CurMaxVelocity = differ * 5;
-        //endif
-        
+            CurMaxVelocity = differ[last_i] * 5;
+
+        //may come with constant spamming of variables, on last. But that's it really.
+
     }//end sails
     //end movement code
-    
+
     //begin attack code
     void ShipAttack()
     {
@@ -343,7 +397,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(AttackGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
-            S_Load();
+            Sp_Load();
         }
 
         if (Input.GetKeyDown("z") && leftFire)
@@ -357,11 +411,11 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(LeftGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
-            L_Load();
+            Le_Load();
             leftFire = false;
         }
 
-        if (Input.GetKeyDown("c") && rghtFire)
+        if (Input.GetKeyDown("c") && rightFire)
         {//think of how to dodge a fore loop?
             for (int i = 0; i < RightGuns.Length; i++)
             {
@@ -372,11 +426,10 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 BulletRB.AddForce(RightGuns[i].transform.up * (GunVelo / 2));
                 //	Debug.Log ("Open Fire!");
             }//end for    //C_Load();//reload, disabled for test code
-            R_Load();
-            rghtFire = false;
+            Ri_Load();
+            rightFire = false;
         }
     }
-
     void GUICode() {
         //ammo part
         if (!canFire /*&& (SpecAmmo > 0)*/) {//if special bar is empty, disabled for now for testing purposes, as it works.
@@ -399,18 +452,17 @@ public class PlayerShipControls_Script : MonoBehaviour {
             }
             LEFT_SLIDE.value = CalcLeftLoad();
         }
-        if (!rghtFire) {//if right bar is empty
+        if (!rightFire) {//if right bar is empty
             r_load += Time.deltaTime;
             if (r_load >= loadRate) {
-                rghtFire = true;
+                rightFire = true;
                 r_load = loadRate;
             }
             RIGHT_SLIDE.value = CalcRightLoad();
         }
     }
-
     //sets firing conditions to false, and empty sliders of each bar
-    void S_Load()
+    void Sp_Load()
     {//begin calc return valves for loading variables
         canFire = false;
         s_load = 0;
@@ -420,7 +472,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     {
         return s_load;
     } //end firing trig code
-    void L_Load()
+    void Le_Load()
     {//begin calc return valves for loading variables
         leftFire = false;
         l_load = 0;
@@ -430,9 +482,9 @@ public class PlayerShipControls_Script : MonoBehaviour {
     {
         return l_load;
     }
-    void R_Load()
+    void Ri_Load()
     {//begin calc return valves for loading variables
-        rghtFire = false;
+        rightFire = false;
         r_load = 0;
         RIGHT_SLIDE.value = CalcRightLoad();
     }
@@ -440,7 +492,4 @@ public class PlayerShipControls_Script : MonoBehaviour {
     {
         return r_load;
     }
-
- 
-
 } 
