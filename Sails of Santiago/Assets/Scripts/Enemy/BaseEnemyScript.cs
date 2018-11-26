@@ -19,7 +19,7 @@ public class BaseEnemyScript : MonoBehaviour {
                            //test being there for testy purposes
 
         //misc references to components
-    private Transform target; //who the ship will chase after
+    public Transform target; //who the ship will chase after
     private Rigidbody RB;//the rigidbody
         //
     public NavMeshAgent agent; //... May need to look on tutorials on recent versions, 
@@ -27,7 +27,7 @@ public class BaseEnemyScript : MonoBehaviour {
     //public Vector3[] PlayerPaths;
         //movement variables
     public float distance;//distance
-    private float min_dist = 50f;//for now
+    public float min_dist = 50f;//for now
 
 
     //enemy ship attack variables

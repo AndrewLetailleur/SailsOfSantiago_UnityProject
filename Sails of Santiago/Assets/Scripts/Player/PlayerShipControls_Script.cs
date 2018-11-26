@@ -14,7 +14,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     public Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
         //health and est/ammo values, stat wise
     public float HP_MAX = 100f;                         //set at 100    And floaty for maximum compatibility on percentages
-    private float Sail_A, HP_Sail, Hull_A, HP_Hull;     //Health        to edit the Alpha values of images, and acquire/set the health of those assets
+    public float Sail_A, HP_Sail, Hull_A, HP_Hull;     //Health        to edit the Alpha values of images, and acquire/set the health of those assets
     private int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
     private int SpecAmmo;//the current amount of ammo, int wise
          //GUI stuff, make public due to glitchy hell
@@ -73,14 +73,17 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //RB = this.GetComponent<Rigidbody>();
                                             
         //get the variables, for a lazy check and add on start
-        GameObject[] g_check = GetComponentsInChildren<GameObject>();
-        foreach (GameObject check in g_check) {
-            if (check.CompareTag("SailPoint")) {
-                Sails.Add(check);
-                Debug.Log(check.name + " Found!");
-                //[].game = check.gameObject; //add the check as game object, hack test
-            }
-        }//end foreach
+        GameObject[] g_check = GetComponentsInChildren<GameObject>(true);
+        if (g_check.Length <= 0) {
+            foreach (GameObject check in g_check) {
+                if (check.CompareTag("SailPoint")) {
+                    Sails.Add(check);
+                    Debug.Log(check.name + " Found!");
+                    //[].game = check.gameObject; //add the check as game object, hack test
+                }
+            }//end foreach
+        }
+
         
         //get the scale of the actual transforms
         Transform[] t_check = GetComponentsInChildren<Transform>();
@@ -492,4 +495,20 @@ public class PlayerShipControls_Script : MonoBehaviour {
     {
         return r_load;
     }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Port") {
+            //add trigger code?
+
+            if (HP_Hull < HP_MAX)
+                HullDamage(-Time.deltaTime);
+            if (HP_Sail < HP_MAX)
+            SailDamage(-Time.deltaTime);
+            //endif
+        }
+    }
+
+
+
 } 
