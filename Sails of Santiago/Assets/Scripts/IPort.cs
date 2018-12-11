@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +12,6 @@ public interface IPort {
     Transform PortAnchorPoint { get; }
     float RadiusOfInfluence { get; }
 
-    void ShipDeparting(IShip ship);
+    //void ShipDeparting(IShip ship);
     //IEnumerator PassiveHealingInPort(IShip ship, IPort port, float radiusOfInfluence);
 }

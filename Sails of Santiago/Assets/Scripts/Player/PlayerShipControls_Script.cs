@@ -178,7 +178,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         //horizontal control
         RotateShip();
         //buggy pirate flag code. Now with only toscale woes!
-        //ChangeSails();
+        //ChangeSails();    //currently buggy, due to detailed models. Thus REDACTED
         //combat code
         ShipAttack();//check firing pin's afterwards
         //the GUI
@@ -188,7 +188,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     }
 
     //damage call codes, for script reference. Decreases health by X amount.
-        //for ports, if lazy/hacky. Use the same code... But do Negative Values instead. As two '-'s =/= a +, operator wise
+        //for ports, if lazy; use the same code... But as Negative Values instead.
     public void SailDamage(float damage) {//by amount
         HP_Sail -= damage; //take away by amount
         Sail_Update();

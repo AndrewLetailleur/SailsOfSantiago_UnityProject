@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +16,7 @@ public class Ship : MonoBehaviour, IShip {
     private float sailHealthMax;
     public float SailHealth { get { return sailHealth; } }
 
+    [SerializeField]
     private CapsuleCollider interactionCollider;
 
     public Ship(string name) {
@@ -27,7 +28,7 @@ public class Ship : MonoBehaviour, IShip {
     }
 
     private void Awake() {
-        interactionCollider = GetComponent<CapsuleCollider>();
+        if (interactionCollider == null) interactionCollider = GetComponent<CapsuleCollider>();
     }
 
     public Transform GetTransform() {
@@ -63,6 +64,12 @@ public class Ship : MonoBehaviour, IShip {
     private void Sink() {
         //disable colliders etc, activate sinking animation.
         //Then delete gameobject
+    }
+
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.F)) {
+            Rigidbody rb = GetComponent<Rigidbody>();
+        }
     }
 
 }
