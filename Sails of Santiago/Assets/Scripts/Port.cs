@@ -36,6 +36,7 @@ public class Port : MonoBehaviour, IPort, IInteractable {
     //use this for gathering object, component and script references.
     private void Awake() {
         influenceSphere = GetComponent<SphereCollider>();
+        if (portInterface.activeInHierarchy) CloseUI();
     }
 
     // Use this for variable initialization

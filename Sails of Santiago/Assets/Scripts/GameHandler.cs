@@ -27,7 +27,7 @@ public class GameHandler : MonoBehaviour {
     }
 
     void Start() {
-        sh.LoadScene("Inside");
+        sh.LoadScene("Menu");
     }
 
     void Update() {

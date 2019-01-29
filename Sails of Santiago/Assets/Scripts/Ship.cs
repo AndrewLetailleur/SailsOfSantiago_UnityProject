@@ -18,6 +18,8 @@ public class Ship : MonoBehaviour, IShip {
 
     [SerializeField]
     private CapsuleCollider interactionCollider;
+    private IInteractable interactableInRange; // Should be implemented as a stack in case of multiple interables in range.
+
 
     public Ship(string name) {
         if (name != null) shipName = name;
@@ -66,9 +68,22 @@ public class Ship : MonoBehaviour, IShip {
         //Then delete gameobject
     }
 
+    private void OnTriggerEnter(Collider other) {
+        IInteractable i = other.GetComponent<IInteractable>();
+        if (i != null) {
+            interactableInRange = i;
+        }
+    }
+    private void OnTriggerExit(Collider other) {
+        IInteractable i = other.GetComponent<IInteractable>();
+        if (i != null) {
+            if (interactableInRange == i) interactableInRange = null;
+        }
+    }
+
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.F)) {
-            Rigidbody rb = GetComponent<Rigidbody>();
+        if (Input.GetKeyDown(KeyCode.F) && interactableInRange != null) {
+            interactableInRange.Interact();
         }
     }
 

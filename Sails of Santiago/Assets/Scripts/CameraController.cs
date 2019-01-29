@@ -13,12 +13,11 @@ public class CameraController : MonoBehaviour {
     private Vector3 offset;
 
     private void Awake() {
-
+        cam = GetComponent<Camera>();
     }
 
     // Use this for initialization
     void Start () {
-        cam = GetComponent<Camera>();
         t = defaultTarget;
         if (offset == null) offset = new Vector3(0.0f, 100.0f, 40.0f);
         transform.position = t.position - offset;
