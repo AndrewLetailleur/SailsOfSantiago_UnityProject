@@ -25,6 +25,7 @@ TagManager:
   - EnemyShot
   - Enemy
   - E_Cannon
+  - OutsideMap
   layers:
   - Default
   - TransparentFX
