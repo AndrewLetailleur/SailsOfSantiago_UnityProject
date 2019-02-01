@@ -24,6 +24,9 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     //gun code, deals with firing and attack grabs. Currently WAY not working
     public GameObject Projectile;//the 'basic ball'
+
+    private int si;
+    public GameObject[] SizeTest; //for testing purposes
     public GameObject[] AttackGuns;
     public GameObject[] LeftGuns;
     public GameObject[] RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
@@ -75,7 +78,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
         //set up/grab ALL the projectiles, update auto wiser. FindWithTag works in this case, since it's linked only to the player itself.
 
-
+         
         /*
          AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
          LeftGuns = GameObject.FindGameObjectsWithTag ("P_LeftCannon");
@@ -86,6 +89,21 @@ public class PlayerShipControls_Script : MonoBehaviour {
     }
     private void setUp()
     {
+
+
+        AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
+        LeftGuns = GameObject.FindGameObjectsWithTag("P_LeftCannon");
+        RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
+
+
+
+
+
+
+
+
+
+
         //pre-empt set move to zero, caution wise.
         Rotation = 0; Velocity = 0;
 
