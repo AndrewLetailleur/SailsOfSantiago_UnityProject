@@ -26,6 +26,7 @@ TagManager:
   - Enemy
   - E_Cannon
   - OutsideMap
+  - Spawner
   layers:
   - Default
   - TransparentFX
