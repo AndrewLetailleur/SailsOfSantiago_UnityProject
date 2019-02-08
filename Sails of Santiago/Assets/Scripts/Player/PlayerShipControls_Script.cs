@@ -409,7 +409,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
             //endif
         }
     }
-
+/*
     [System.Serializable]
     public class AxleInfo
     {
@@ -418,5 +418,5 @@ public class PlayerShipControls_Script : MonoBehaviour {
         public bool motor; // is this wheel attached to motor?
         public bool steering; // does this wheel apply steer angle?
     }
-
+*/
 } 

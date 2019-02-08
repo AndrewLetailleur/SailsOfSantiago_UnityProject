@@ -17,6 +17,8 @@ public class PlayerCollider : MonoBehaviour {
     private PlayerShipControls_Script playRef; /*the script itself, player only wise*/
     public float damage = 10f; //test variable
     public bool Saily, Hully = false;/*test triggers*/
+    private bool NoSail, NoHull = false;
+    public GameObject[] SailArray;//for if going lazy on set active, if damaged/destroyed. Hack wise.
 
     // Use this for initialization
     void Start() {
@@ -35,6 +37,17 @@ public class PlayerCollider : MonoBehaviour {
 
     }
 
+    void Update()
+    {
+        if (playRef.HP_Sail > 0 && NoSail) {
+            NoSail = false;
+            foreach (GameObject go in SailArray) {
+                go.SetActive(false);
+            }
+        }
+    }
+
+
     private void OnTriggerEnter(Collider other)
     {
 
@@ -43,6 +56,13 @@ public class PlayerCollider : MonoBehaviour {
             Debug.Log("Sail is damaged!!!"); 
             playRef.SailDamage(damage);
             Destroy(other.gameObject);//destroy the collider afterwards, jnc
+
+            if (playRef.HP_Sail <= 0 && !NoSail)
+            {
+                NoSail = true;
+                foreach (GameObject go in SailArray) { go.SetActive(false); }
+//                this.gameObject.SetActive(false);//disable itself, hack wise?
+            }
         }
 
         if (other.gameObject.tag == "EnemyShot" && Hully)
@@ -50,6 +70,9 @@ public class PlayerCollider : MonoBehaviour {
             Debug.Log("Hull is damaged!!!");
             playRef.HullDamage(damage);
             Destroy(other.gameObject);//destroy the collider afterwards, jnc
+
+            if (playRef.HP_Hull <= 0 && !NoSail) { NoHull = false; }
+
         }
     }
 }
