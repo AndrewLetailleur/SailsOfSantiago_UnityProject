@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 /* Code Written by; Andrew Letailleur (2018) */
 
 public class PlayerCollider : MonoBehaviour {
@@ -19,7 +20,7 @@ public class PlayerCollider : MonoBehaviour {
     public bool Saily, Hully = false;/*test triggers*/
     private bool NoSail, NoHull = false;
     public GameObject[] SailArray;//for if going lazy on set active, if damaged/destroyed. Hack wise.
-
+    public BoxCollider[] HitCol;//in array format, hack wise
     // Use this for initialization
     void Start() {
             ///OldCode
@@ -41,9 +42,8 @@ public class PlayerCollider : MonoBehaviour {
     {
         if (playRef.HP_Sail > 0 && NoSail) {
             NoSail = false;
-            foreach (GameObject go in SailArray) {
-                go.SetActive(false);
-            }
+            foreach (GameObject go in SailArray) { go.SetActive(true); }
+            foreach (BoxCollider col in HitCol) { col.enabled = !col.enabled; }
         }
     }
 
@@ -61,7 +61,8 @@ public class PlayerCollider : MonoBehaviour {
             {
                 NoSail = true;
                 foreach (GameObject go in SailArray) { go.SetActive(false); }
-//                this.gameObject.SetActive(false);//disable itself, hack wise?
+                foreach (BoxCollider col in HitCol) { col.enabled = !col.enabled; }
+                //                this.gameObject.SetActive(false);//disable itself, hack wise?
             }
         }
 
@@ -71,8 +72,25 @@ public class PlayerCollider : MonoBehaviour {
             playRef.HullDamage(damage);
             Destroy(other.gameObject);//destroy the collider afterwards, jnc
 
-            if (playRef.HP_Hull <= 0 && !NoSail) { NoHull = false; }
+            if (playRef.HP_Hull <= 0) {
+                NoHull = false;
+                foreach (BoxCollider col in HitCol) { col.enabled = !col.enabled; }
+                GameOver();
+            }
 
         }
     }
+
+    private float delay = 6f;
+    private void GameOver() {
+
+        StartCoroutine(LoadScene(delay));
+    }
+
+    IEnumerator LoadScene(float delay) {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene("Menu");
+    }
+
+
 }

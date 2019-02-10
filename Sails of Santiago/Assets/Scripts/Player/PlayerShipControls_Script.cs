@@ -12,21 +12,23 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     ///GUI & Stats code, later link/grab dependencies from upgrades
     public Slider LEFT_SLIDE, RIGHT_SLIDE, SPEC_SLIDE; //for the slider GUI thing
-                                                       //health and est/ammo values, stat wise
+
+    //health and est/ammo values, stat wise
     public float HP_MAX = 100f;                         //set at 100    And floaty for maximum compatibility on percentages
     public float Sail_A, HP_Sail, Hull_A, HP_Hull;     //Health        to edit the Alpha values of images, and acquire/set the health of those assets
-    private int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
+
     private int SpecAmmo;//the current amount of ammo, int wise
-                         //GUI stuff, make public due to glitchy hell
+    public int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
+    
+    //GUI stuff, make public due to glitchy hell
     public Image Sail_HUD, Hull_HUD;           //for the GUI images,    icon wise
     public Color Sail_COL, Hull_COL;           //for the colors,       alpha wise
     public Text Hull_TXT, Sail_TXT, Spec_TXT;  //for the text display,   TXT wise
 
     //gun code, deals with firing and attack grabs. Currently WAY not working
-    public GameObject Projectile;//the 'basic ball'
+    public GameObject Projectile;//the 'basic ball' to fire
 
-    private int si;
-    public GameObject[] SizeTest; //for testing purposes
+   // private int si; //not needed? public GameObject[] SizeTest; //for testing purposes, gather array wise
     public GameObject[] AttackGuns;
     public GameObject[] LeftGuns;
     public GameObject[] RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
@@ -73,40 +75,23 @@ public class PlayerShipControls_Script : MonoBehaviour {
         /// https://answers.unity.com/questions/787538/how-do-i-find-a-child-object-in-a-hierarchy-of-chi.html
         /// </summary>
 
-        RB = GetComponent<Rigidbody>();//sets the RB
-                                       //RB = this.GetComponent<Rigidbody>();
-
-        //set up/grab ALL the projectiles, update auto wiser. FindWithTag works in this case, since it's linked only to the player itself.
-
-         
-        /*
-         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
-         LeftGuns = GameObject.FindGameObjectsWithTag ("P_LeftCannon");
-         RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
-         */
-
+        RB = GetComponent<Rigidbody>();//sets the RB = this.GetComponent<Rigidbody>();
         setUp();
+        guiSetUp();
     }
-    private void setUp()
+
+
+    private void setUp()//set up/grab ALL the projectiles, update auto wiser. FindWithTag works in this case, since it's linked only to the player itself.
     {
-
-
         AttackGuns = GameObject.FindGameObjectsWithTag("P_SpecCannon");
         LeftGuns = GameObject.FindGameObjectsWithTag("P_LeftCannon");
         RightGuns = GameObject.FindGameObjectsWithTag("P_RightCannon");
-
-
-
-
-
-
-
-
-
-
+        
         //pre-empt set move to zero, caution wise.
         Rotation = 0; Velocity = 0;
+    }
 
+    private void guiSetUp() {
         //get sliders, then set values est
         //left cannon set up
         l_load = loadRate;
@@ -148,10 +133,9 @@ public class PlayerShipControls_Script : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         //update GUI, later when harmed only to save on RAM. 
-
   
-        //currently bugged due to model hassle. Thus REDACTED
-            //ChangeSails();   
+        //technically 'tweaked' to be according to collisions, health display wise
+            //ChangeSails();
 
         //vertical control
             MoveShip();
@@ -283,10 +267,8 @@ public class PlayerShipControls_Script : MonoBehaviour {
     //begin attack code
     void ShipAttack()
     {
-        float GunVelo = ((Speed / 4) + 1) * 1024;
+        float GunVelo = 1 * 1024;//((Speed / 4) + 1)
          
-        if (GunVelo > 2048)
-            GunVelo = 2048;
         //end hack if
         //Spacebar for now, BAR test-y wise
 
@@ -405,10 +387,17 @@ public class PlayerShipControls_Script : MonoBehaviour {
             if (HP_Hull < HP_MAX)
                 HullDamage(-Time.deltaTime);
             if (HP_Sail < HP_MAX)
-            SailDamage(-Time.deltaTime);
+                SailDamage(-Time.deltaTime);
             //endif
         }
     }
+
+    float lifeToDie = 2f;
+    public void KillScript() {
+
+        Destroy(this.gameObject, lifeToDie);
+    }
+
 /*
     [System.Serializable]
     public class AxleInfo
