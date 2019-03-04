@@ -8,7 +8,10 @@ using UnityEngine.AI;//adds/uses NavMeshAgent, ref wise
 public class BaseEnemyScript : MonoBehaviour {
 
     //keep things public for now. Private when need be.
-    
+
+    private int Kill_Value = 1; //since 1 = 1 kill say, score wise. Ideally, 10y later?
+    private LazyScoreCount Score;
+
     private float Max_FireRate = 1.8f;
     private float FireRate = 0f;
     private bool Loaded = true;
@@ -38,6 +41,7 @@ public class BaseEnemyScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        Score = GameObject.FindGameObjectWithTag("Score").GetComponent<LazyScoreCount>();
         target = GameObject.FindGameObjectWithTag("Player").transform; //position wise
         agent = GetComponent<NavMeshAgent>();
         //path = GetComponent<NavMeshPath>();//get THE path, per say?
@@ -158,7 +162,8 @@ public class BaseEnemyScript : MonoBehaviour {
     {//by amount
         if (HP_Test > HP_Max)
             HP_Test = HP_Max;
-        else if (HP_Test <= 0) { 
+        else if (HP_Test <= 0) {
+            Score.ScoreCount(Kill_Value);//add value to death, test.
             Destroy(this.gameObject);//destroy an enemy
             Debug.Log("I'm sinking!!!");
         }//endif

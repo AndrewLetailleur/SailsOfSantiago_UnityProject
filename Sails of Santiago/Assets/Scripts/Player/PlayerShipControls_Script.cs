@@ -19,7 +19,8 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
     private int SpecAmmo;//the current amount of ammo, int wise
     public int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
-    
+    public float hazardRes = 3f;
+
     //GUI stuff, make public due to glitchy hell
     public Image Sail_HUD, Hull_HUD;           //for the GUI images,    icon wise
     public Color Sail_COL, Hull_COL;           //for the colors,       alpha wise
@@ -133,18 +134,18 @@ public class PlayerShipControls_Script : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         //update GUI, later when harmed only to save on RAM. 
-  
-        //technically 'tweaked' to be according to collisions, health display wise
-            //ChangeSails();
 
-        //vertical control
-            MoveShip();
-        //horizontal control
-            RotateShip();
-        
+        //technically 'tweaked' to be according to collisions, health display wise
+        //ChangeSails();
+
+
+        if (HP_Hull > 0) {//movement able check
+            MoveShip();//vertical control
+            RotateShip();//horizontal control
+        }
 
         //combat code
-            ShipAttack();//check firing pin's afterwards
+        ShipAttack();//check firing pin's afterwards
         
         //the GUI
         GUICode();//also does reloading, so there's no need TO reload :P
@@ -170,9 +171,10 @@ public class PlayerShipControls_Script : MonoBehaviour {
         if (Hull_A < 0) { Hull_A = 0; }//so it doesn't go above 0
         //end if, consider adding a "if above 1" variable as a consideration later
         Hull_COL.a = Hull_A; //set transparency, should be at 1 approx.
-        if (HP_Hull <= 0)
+        if (HP_Hull <= 0) { 
             Hull_TXT.text = "SUNK!";//then trigger sink death con?
-        else
+            RB.constraints = RigidbodyConstraints.None;//hack test out of desperation
+        } else
             Hull_TXT.text = "Hull:" + Math.Round(HP_Hull, 3) + "%";//rounds the digits down, JNC
         //endif
 
@@ -318,11 +320,11 @@ public class PlayerShipControls_Script : MonoBehaviour {
     }
     void GUICode() {
         //ammo part
-        if (!canFire /*&& (SpecAmmo > 0)*/) {//if special bar is empty, disabled for now for testing purposes, as it works.
+        if (!canFire /*&& (SpecAmmo > 0)*/) {//if special bar is empty.
             s_load += Time.deltaTime;
             if (s_load >= loadRate) {
-                //if (!canFire)
-                //    SpecAmmo--;
+                if (!canFire)
+                    SpecAmmo--;
                 //endif
                 canFire = true;
                 s_load = loadRate;
@@ -390,14 +392,22 @@ public class PlayerShipControls_Script : MonoBehaviour {
                 SailDamage(-Time.deltaTime);
             //endif
         }
+
+        if (other.tag == "Hazard") {
+            //cue damage val
+            if (Speed >= MaxVelocity / 2)
+                Speed -= Time.deltaTime * (Accel / 2);
+            HullDamage(Time.deltaTime / (1 + hazardRes) ); 
+        } 
     }
 
-    float lifeToDie = 2f;
-    public void KillScript() {
+    float lifeToDie = 2f; 
 
+    public GameObject camPoint;
+    public void KillScript() {
         Destroy(this.gameObject, lifeToDie);
     }
-
+    
 /*
     [System.Serializable]
     public class AxleInfo

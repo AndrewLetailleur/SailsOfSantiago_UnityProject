@@ -27,6 +27,9 @@ TagManager:
   - E_Cannon
   - OutsideMap
   - Spawner
+  - Hazard
+  - G_Field
+  - Score
   layers:
   - Default
   - TransparentFX

@@ -12,10 +12,11 @@ public class PlayerCollider : MonoBehaviour {
     ///     it calls upon the damage function on a hull or sail for the player
     /// </summary> Was split into Sail and Hull collider's, but I simplified the code to a universal one, ish. ;)
 
-        ///ps, sollution found in enemy script has been parraelled here, since it's less assets managed/est
+    ///ps, sollution found in enemy script has been parraelled here, since it's less assets managed/est
 
     //no longer needed public GameObject hitbox;/*set as linked to parent, hack wiser*/
     private PlayerShipControls_Script playRef; /*the script itself, player only wise*/
+    private Rigidbody RB;
     public float damage = 10f; //test variable
     public bool Saily, Hully = false;/*test triggers*/
     private bool NoSail, NoHull = false;
@@ -29,6 +30,7 @@ public class PlayerCollider : MonoBehaviour {
         */
                 //better, more efficient code
         playRef = GetComponentInParent<PlayerShipControls_Script>();//grab the script
+        RB = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
 
         if (this.gameObject.tag == "Hull")
             Hully = true;
@@ -81,6 +83,14 @@ public class PlayerCollider : MonoBehaviour {
         }
     }
 
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "G_Field")
+        {
+            SceneManager.LoadScene("GameOver"); //debug quit trigger
+        }
+    }
     private float delay = 6f;
     private void GameOver() {
 
@@ -89,7 +99,7 @@ public class PlayerCollider : MonoBehaviour {
 
     IEnumerator LoadScene(float delay) {
         yield return new WaitForSeconds(delay);
-        SceneManager.LoadScene("Menu");
+        SceneManager.LoadScene("GameOver");
     }
 
 
