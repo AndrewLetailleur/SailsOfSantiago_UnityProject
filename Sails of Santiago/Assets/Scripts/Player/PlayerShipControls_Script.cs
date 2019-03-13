@@ -259,7 +259,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
 
         //the rotation magic
         transform.Rotate(0, Rotation, 0);//works, but is too sharp. Think of how to then rotate the force/momentum of the ship
-
+        
         //rotate the velocity as well, after rotating.
         Vector3 velocity = RB.velocity;//TEMP VALUE, SOURCE == https://answers.unity.com/questions/10781/how-might-i-rotate-rigidbody-momentum.html
         RB.velocity = Vector3.zero;
