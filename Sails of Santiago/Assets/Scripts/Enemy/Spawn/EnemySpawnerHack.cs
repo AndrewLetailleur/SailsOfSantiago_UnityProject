@@ -7,6 +7,9 @@ public class EnemySpawnerHack : MonoBehaviour {
     //the objects, in lazy variables 
     //public GameObject Enemy;
 
+    public GameObject playRef;
+    private float p_x, p_y, p_z;
+
     public GameObject flagger;
     public List<GameObject> spawnFlags = new List<GameObject>();
     public float angle_step = 0.1f;
@@ -24,13 +27,14 @@ public class EnemySpawnerHack : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        playRef = GameObject.FindWithTag("Player");
+
         SpawnCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
         Counter = MaxTime;
 
-        float seaY = GameObject.FindGameObjectWithTag("Player").transform.position.y;
+        p_y = playRef.transform.position.y;
 
         float angle = 0;
-
         while (angle < 2 * Mathf.PI) {
 
             // calculate x, y from a vector with known length and angle
@@ -38,19 +42,30 @@ public class EnemySpawnerHack : MonoBehaviour {
             float sz = distance * Mathf.Sin(angle);
             
             spawnFlags.Add(Instantiate
-                (flagger, new Vector3 (sx, seaY, sz),   //adds a new vector3, with the position co-ordinates
+                (flagger, new Vector3 (sx, p_y, sz),   //adds a new vector3, with the position co-ordinates
                 transform.rotation,                     //keep rotation as is lazy, since it'd rotate itself
                 transform.parent = this.transform)      //so that it's the 'child' from where this spawner is attached to
                 as GameObject);                         //as the game object itself 
 
-            angle += angle_step;
+            angle += angle_step;      //increment angle by amount of "steps". This should give approx 20 'steps' from a public float of 0.1F
         }
 
         //if //
+
+        SetPosition();
+    }
+
+
+    void SetPosition() {
+        p_x = playRef.transform.position.x;
+        p_z = playRef.transform.position.z;
+        this.transform.position = new Vector3(p_x, p_y, p_z);
     }
 
     // Update is called once per frame
     void Update() {
+        SetPosition();
+
 
         if (SpawnCount < MaxCount)
             Counter -= Time.deltaTime;

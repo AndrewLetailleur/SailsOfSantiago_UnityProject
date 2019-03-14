@@ -21,6 +21,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     public int MaxAmmo = 21;//Should be int, bar floaty timer shenanigans with dragon fire?
     public float hazardRes = 3f;
 
+
     //GUI stuff, make public due to glitchy hell
     public Image Sail_HUD, Hull_HUD;           //for the GUI images,    icon wise
     public Color Sail_COL, Hull_COL;           //for the colors,       alpha wise
@@ -34,9 +35,10 @@ public class PlayerShipControls_Script : MonoBehaviour {
     public GameObject[] LeftGuns;
     public GameObject[] RightGuns; //lazy hack test version, of the real deal. Attack =/= Special, carry over wise
     private bool canFire, leftFire, rightFire = true;//fire triggers, cue firing pins.
-                                                     //rate of fire
+                                              //rate of fire
     private float loadRate = 1F;//approx. 1 second or such, to start?
     private float s_load, l_load, r_load = 0f;//loading times, reset upon fire
+    private float time_s, m_time = 1f;
                                               //special ammo
 
     ///ship sail variables, now with more (buggy) List-y Arrays edition! (For maximum scalability)
@@ -110,7 +112,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
         SPEC_SLIDE.maxValue = loadRate;
         SPEC_SLIDE.value = CalcSpecialLoad();
         //text HUD variables on top
-        SpecAmmo = MaxAmmo;//auto load
+        SpecAmmo = MaxAmmo + 1;//auto load. Dirty hack, but works for now.
         Spec_TXT = GameObject.FindGameObjectWithTag("SpecialTXT").GetComponent<Text>();
         Spec_TXT.text = "Ammo: " + SpecAmmo + "/" + MaxAmmo;
         //end grab sliders
@@ -320,7 +322,7 @@ public class PlayerShipControls_Script : MonoBehaviour {
     }
     void GUICode() {
         //ammo part
-        if (!canFire /*&& (SpecAmmo > 0)*/) {//if special bar is empty.
+        if (!canFire && (SpecAmmo > 0)) {//if special bar is empty.
             s_load += Time.deltaTime;
             if (s_load >= loadRate) {
                 if (!canFire)
@@ -332,6 +334,9 @@ public class PlayerShipControls_Script : MonoBehaviour {
             }
             SPEC_SLIDE.value = CalcSpecialLoad();
         }
+
+        if (SpecAmmo <= 0) { Spec_TXT.text = "Ammo: EMPTY"; }
+
         if (!leftFire) {//if left bar is empty
             l_load += Time.deltaTime;
             if (l_load >= loadRate) {
@@ -381,6 +386,11 @@ public class PlayerShipControls_Script : MonoBehaviour {
         return r_load;
     }
 
+    private void OnTriggerLeave(Collider other)
+    {
+        if (other.tag == "Port") { time_s = m_time; }
+    }
+
     private void OnTriggerStay(Collider other)
     {
         if (other.tag == "Port") {
@@ -391,6 +401,16 @@ public class PlayerShipControls_Script : MonoBehaviour {
             if (HP_Sail < HP_MAX)
                 SailDamage(-Time.deltaTime);
             //endif
+
+            if (SpecAmmo < MaxAmmo) {
+                time_s -= Time.deltaTime;
+                if (time_s <= 0) {
+                    SpecAmmo++;
+                    Spec_TXT.text = "Ammo: " + SpecAmmo + "/" + MaxAmmo;
+                    time_s = m_time;
+                }
+            }
+            ///
         }
 
         if (other.tag == "Hazard") {

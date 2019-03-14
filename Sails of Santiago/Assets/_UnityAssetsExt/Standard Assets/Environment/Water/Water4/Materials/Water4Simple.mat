@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Water4Simple
   m_Shader: {fileID: 4800000, guid: 8aaff0751054e4a9cb4642d01eaf5be9, type: 3}
   m_ShaderKeywords: 
@@ -84,7 +85,7 @@ Material:
     - _ReflectionColor: {r: 0.47582978, g: 0.6064865, b: 0.6641791, a: 0.47058824}
     - _RefractionFog: {r: 0.8681778, g: 0.8797176, b: 0.8880597, a: 1}
     - _SpecularColor: {r: 0.82089555, g: 0.80581594, b: 0.7718869, a: 1}
-    - _WorldLightDir: {r: 0.013992369, g: -0.17359081, b: -0.9847186, a: 0}
+    - _WorldLightDir: {r: 0.013992369, g: -0.1649911, b: -0.9861962, a: 0}
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6
