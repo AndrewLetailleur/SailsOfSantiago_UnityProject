@@ -54,8 +54,7 @@ public class PlayerCollider : MonoBehaviour {
     {
 
         if (other.gameObject.tag == "EnemyShot" && Saily)
-        {
-            Debug.Log("Sail is damaged!!!"); 
+        {//Debug.Log("Sail is damaged!!!"); 
             playRef.SailDamage(damage);
             Destroy(other.gameObject);//destroy the collider afterwards, jnc
 
@@ -69,8 +68,7 @@ public class PlayerCollider : MonoBehaviour {
         }
 
         if (other.gameObject.tag == "EnemyShot" && Hully)
-        {
-            Debug.Log("Hull is damaged!!!");
+        {//Debug.Log("Hull is damaged!!!");
             playRef.HullDamage(damage);
             Destroy(other.gameObject);//destroy the collider afterwards, jnc
 

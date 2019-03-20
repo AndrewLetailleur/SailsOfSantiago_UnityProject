@@ -37,8 +37,16 @@ public class Projectile : MonoBehaviour {
             waterFlag = true;
             Splash();//flag
         }
-        //else
-            //hitFlag = true;
+
+        if (other.gameObject.tag == "Enemy")
+        {
+            Smash();//flag
+            Destroy(other.gameObject);//hack smash effect
+        }
+
+        else { 
+            Smash();
+        }
         //endif
     }
 

@@ -30,6 +30,7 @@ TagManager:
   - Hazard
   - G_Field
   - Score
+  - Timer
   layers:
   - Default
   - TransparentFX
