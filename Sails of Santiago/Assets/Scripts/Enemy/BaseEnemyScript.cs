@@ -111,6 +111,15 @@ public class BaseEnemyScript : MonoBehaviour {
         Destroy(this.gameObject);
         //test two, hope it frickin' works!
     }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "NoSpawner") {
+            Debug.Log("Enemy in land, DELETE");
+            Destroy(this.gameObject);
+        }
+    }
+
     //begin movement code hack
 
 

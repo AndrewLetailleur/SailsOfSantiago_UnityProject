@@ -24,13 +24,13 @@ public class SpawnFlagCode : MonoBehaviour {
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Terrain") { ColFlag = true; }
+        if (other.tag == "Terrain" || other.tag == "NoSpawner") { ColFlag = true; }
         else { ColFlag = false; }
     }
 
     public void FlagCheck() {
         if (!ColFlag) { SpawnShip(); Debug.Log("Reroll!"); }
-        else { Ex_Code.SpawnAndCheck(); }//check again, if collider is true
+        else { Ex_Code.SpawnAndCheck(); Debug.Log("Collision!"); }//check again, if collider is true
     }
 
 
