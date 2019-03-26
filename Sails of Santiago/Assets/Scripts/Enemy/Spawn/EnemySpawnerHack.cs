@@ -13,6 +13,10 @@ public class EnemySpawnerHack : MonoBehaviour {
     public GameObject flagger;
     public List<GameObject> spawnFlags = new List<GameObject>();
     public float angle_step = 0.1f;
+    public bool PI_Half = true;
+    private float PI_Angle = 160f;
+    private float Player_Angle;
+    private int PI_Multi;
 
     public int SpawnCount;//= GameObject.FindGameObjectsWithTag("Enemy").Length;
     public int MaxCount = 4;
@@ -34,8 +38,16 @@ public class EnemySpawnerHack : MonoBehaviour {
 
         p_y = playRef.transform.position.y;
 
+
+
+        if (PI_Half)
+            PI_Multi = 1;
+        else
+            PI_Multi = 2;
+        //endif
+
         float angle = 0;
-        while (angle < 2 * Mathf.PI) {
+        while (angle < PI_Multi * Mathf.PI) {//hack attempt at a "half circle" in placement
 
             // calculate x, y from a vector with known length and angle
             float sx = distance * Mathf.Cos(angle);
@@ -50,7 +62,9 @@ public class EnemySpawnerHack : MonoBehaviour {
             angle += angle_step;      //increment angle by amount of "steps". This should give approx 20 'steps' from a public float of 0.1F
         }
 
-        //if //
+        if (PI_Half)
+            transform.eulerAngles = new Vector3(0, PI_Angle, 0);
+        //endif
 
         SetPosition();
     }
@@ -66,6 +80,8 @@ public class EnemySpawnerHack : MonoBehaviour {
     void Update() {
         SetPosition();
 
+        if (PI_Half)
+            SetSpawnRotation();
 
         if (SpawnCount < MaxCount)
             Counter -= Time.deltaTime;
@@ -77,6 +93,12 @@ public class EnemySpawnerHack : MonoBehaviour {
             if (SpawnCount < MaxCount) { SpawnAndCheck(); }//fire a spawn flag, all systems go for firing a new enemy
             //else { Debug.Log("No More Foes"); }
         }
+    }
+
+    void SetSpawnRotation() {
+        Player_Angle = playRef.transform.eulerAngles.y;
+        float spawnRot = PI_Angle + Player_Angle;
+        transform.eulerAngles = new Vector3(0, spawnRot, 0);
     }
 
 

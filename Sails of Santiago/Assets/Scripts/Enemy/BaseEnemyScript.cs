@@ -23,7 +23,7 @@ public class BaseEnemyScript : MonoBehaviour {
                            //test being there for testy purposes
 
     //misc references to components
-    public GameObject playa;
+    public GameObject playa, fallFX;
     public Transform target; //who the ship will chase after
     private Rigidbody RB;//the rigidbody
         //
@@ -178,6 +178,7 @@ public class BaseEnemyScript : MonoBehaviour {
         else if (HP_Test <= 0) {
             Score.ScoreCount(Kill_Value);//add value to death, test.
             Ttt.TimeAdd(); //adds the time to the counter
+            Instantiate(fallFX, transform.position, transform.rotation);
             Destroy(this.gameObject);//destroy an enemy
             //Debug.Log("I'm sinking!!!");
         }//endif

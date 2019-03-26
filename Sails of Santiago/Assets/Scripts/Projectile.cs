@@ -38,7 +38,7 @@ public class Projectile : MonoBehaviour {
             Splash();//flag
         }
 
-        if (other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Enemy" && this.gameObject.tag != "EnemyShot")
         {
             Smash();//flag
             Destroy(other.gameObject);//hack smash effect
